@@ -77,22 +77,4 @@ class PembelianResource(Resource):
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
-    def put(self, id_pembelian):
-        qry = Pembelian.query.get(id_pembelian)
-
-        parser = reqparse.RequestParser()
-        parser.add_argument('nomor_resi', location = 'json')
-        args = parser.parse_args()
-        
-        qry.nomor_resi = args['nomor_resi']
-
-        qry.updated_at = datetime.datetime.now()
-
-        db.session.commit()
-        if qry is not None:
-            return marshal(qry, Pembelian.response_field), 200, {'Content_type' : 'application/json'}
-        else:
-            return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
-
-
 api.add_resource(PembelianResource, '', '/<int:id_pembelian>')

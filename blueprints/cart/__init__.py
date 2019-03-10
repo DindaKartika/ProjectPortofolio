@@ -2,6 +2,8 @@ import random, logging
 from blueprints import db
 from flask_restful import fields
 
+from blueprints.pembelian import *
+
 class Cart(db.Model):
 
     __tablename__ = "cart"

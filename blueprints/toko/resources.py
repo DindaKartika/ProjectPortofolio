@@ -16,10 +16,13 @@ class TokoResource(Resource):
 
     @jwt_required
     def get(self, id_toko):
-        jwtClaim = get_jwt_claims()
         qry = Toko.query.get(id_toko)
+        tokos = marshal(qry, Toko.response_field)
+        details = DetailToko.query.get(id_toko)
+        tokos['detail'] = marshal(details, DetailToko.response_field)
+        
         if qry is not None:
-            return marshal(qry, Toko.response_field), 200, {'Content_type' : 'application/json'}
+            return tokos, 200, {'Content_type' : 'application/json'}
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
     
@@ -51,47 +54,23 @@ class MyTokoResource(Resource):
         pass
 
     @jwt_required
-    def get(self, id_toko = None):
+    def get(self):
         jwtClaim = get_jwt_claims()
-        if id_toko == None:
-            qry = Toko.query
-            if jwtClaim['status'] == 'admin':
-                parser = reqparse.RequestParser()
-                parser.add_argument('p', type = int, location = 'args', default = 1)
-                parser.add_argument('rp', type = int, location = 'args', default = 5)
-                parser.add_argument('nama_toko', type = str, location = 'args')
-                parser.add_argument('id_member', type=str, location = 'args')
-                parser.add_argument('status', type=str, location = 'args')
-                args = parser.parse_args()
 
-                offside = (args['p'] * args['rp']) - args['rp']
-                
-                if args['nama_toko'] is not None:
-                    qry = qry.filter(Toko.nama_toko.like("%"+args['nama_toko']+"%"))
-                if args['id_member'] is not None:
-                    qry = qry.filter(Toko.id_member==args['id_member'])
-                if args['status'] is not None:
-                    qry = qry.filter(Toko.status.like("%"+args['status']+"%"))
+        qry = Toko.query
+        id_members = jwtClaim['id_member']
+        qry = Toko.query.filter(Toko.id_member == id_members).one()
 
-                rows = []
-                for row in qry.limit(args['rp']).offset(offside).all():
-                    rows.append(marshal(row, Toko.response_field))
+        tokos = marshal(qry, Toko.response_field)
+        details = DetailToko.query.get(qry.id_toko)
+        tokos['detail'] = marshal(details, DetailToko.response_field)
 
-                return rows, 200, {'Content_type' : 'application/json'}
-            elif jwtClaim['id_member'] == qry.id_member:
-                qry = qry.filter(Toko.id_member==jwtClaim['id_member'])
-
-                rows = []
-                for row in qry.limit(args['rp']).offset(offside).all():
-                    rows.append(marshal(row, Toko.response_field))
-
-                return rows, 200, {'Content_type' : 'application/json'}
+        if tokos is not None:
+            return tokos, 200, {'Content_type' : 'application/json'}
         else:
-            qry = Toko.query.get(id_toko)
-            if qry is not None:
-                return marshal(qry, Toko.response_field), 200, {'Content_type' : 'application/json'}
-            else:
-                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+            return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+
+
 
     @jwt_required
     def delete(self):
@@ -145,3 +124,213 @@ class MyTokoResource(Resource):
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
 api.add_resource(MyTokoResource, '/me')
+
+class BukuTokoResource(Resource):
+
+    def __init__(self):
+        pass
+
+    @jwt_required
+    def get(self, id_buku = None):
+        if id_buku == None:
+            parser = reqparse.RequestParser()
+            parser.add_argument('p', type = int, location = 'args', default = 1)
+            parser.add_argument('rp', type = int, location = 'args', default = 5)
+            parser.add_argument('id_toko', type = str, location = 'args')
+            parser.add_argument('judul_buku', type = str, location = 'args')
+            parser.add_argument('kondisi', type = str, location = 'args')
+            parser.add_argument('kategori', type=str, location = 'args')
+            parser.add_argument('status', type=str, location = 'args')
+            args = parser.parse_args()
+
+            offside = (args['p'] * args['rp']) - args['rp']
+            qry = buku.query
+
+            if args['id_toko'] is not None:
+                qry = qry.filter(Buku.id_toko==args['id_toko'])
+            if args['judul_buku'] is not None:
+                qry = qry.filter(Buku.judul_buku.like("%"+args['judul_buku']+"%"))
+            if args['kondisi'] is not None:
+                qry = qry.filter(Buku.kondisi.like("%"+args['kondisi']+"%"))
+            if args['kategori'] is not None:
+                qry = qry.filter(Buku.kategori.like("%"+args['kategori']+"%"))
+            if args['status'] is not None:
+                qry = qry.filter(Buku.status.like("%"+args['status']+"%"))
+
+            rows = []
+            for row in qry.limit(args['rp']).offset(offside).all():
+                rows.append(marshal(row, Buku.response_field))
+
+            return rows, 200, {'Content_type' : 'application/json'}
+        else:
+            qry = buku.query.get(id_buku)
+            if qry is not None:
+                return marshal(qry, Buku.response_field), 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+    
+    @jwt_required
+    def post(self):
+        jwtClaim = get_jwt_claims()
+
+        id_member = jwtClaim['id_member']
+        tokos = Toko.query.filter(Toko.id_member == id_member).one()
+        id_tokos = tokos.id_toko
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('judul_buku', location = 'json', required = True)
+        parser.add_argument('harga', location = 'json', required = True)
+        parser.add_argument('kategori', location = 'json', required = True)
+        parser.add_argument('gambar', location = 'json', required = True)
+        parser.add_argument('kode_promo', location = 'json', required = True)
+        parser.add_argument('kondisi', location = 'json', required = True)
+        args = parser.parse_args()
+
+        args['id_toko'] = id_tokos
+
+        args['status'] = "dijual"
+        created_at = datetime.datetime.now()
+        updated_at = datetime.datetime.now()
+
+        bukus = Buku(None, args['id_toko'], args['judul_buku'], args['harga'], args['kategori'], args['gambar'], args['kode_promo'], args['kondisi'], args['status'], created_at, updated_at)
+        db.session.add(bukus)
+        db.session.commit()
+
+        return marshal(bukus, Buku.response_field), 200, {'Content_type' : 'application/json'}
+
+    @jwt_required
+    def delete(self, id_buku):
+        qry = Buku.query.get(id_buku)
+        details = DetailBuku.query.get(id_buku)
+        
+        db.session.delete(details)
+        db.session.delete(qry)
+        db.session.commit()
+
+        if qry is not None:
+            return 'Deleted', 200, {'Content_type' : 'application/json'}
+        else:
+            return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+
+    @jwt_required
+    def put(self, id_buku):
+        qry = Buku.query.get(id_buku)
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('harga', location = 'json')
+        parser.add_argument('kategori', location = 'json')
+        parser.add_argument('gambar', location = 'json')
+        parser.add_argument('kode_promo', location = 'json')
+        parser.add_argument('status', location = 'json')
+        args = parser.parse_args()
+        
+        if args['harga'] is not None:
+            qry.harga = args['harga']
+        if args['kategori'] is not None:
+            qry.kategori = args['kategori']
+        if args['gambar'] is not None:
+            qry.gambar = args['gambar']
+        if args['kode_promo'] is not None:
+            qry.kode_promo = args['kode_promo']
+        if args['status'] is not None:
+            qry.status = args['status']
+
+        qry.updated_at = datetime.datetime.now()
+
+        db.session.commit()
+        if qry is not None:
+            return marshal(qry, Buku.response_field), 200, {'Content_type' : 'application/json'}
+        else:
+            return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+
+
+api.add_resource(BukuTokoResource, '/buku', '/buku/<int:id_buku>')
+
+class PembelianResource(Resource):
+
+    def __init__(self):
+        pass
+
+    def get(self, id_pembelian = None):
+        if id_pembelian == None:
+            parser = reqparse.RequestParser()
+            parser.add_argument('p', type = int, location = 'args', default = 1)
+            parser.add_argument('rp', type = int, location = 'args', default = 5)
+            parser.add_argument('id_pembeli', type = str, location = 'args')
+            parser.add_argument('id_cart', type=str, location = 'args')
+            parser.add_argument('id_toko', type=str, location = 'args')
+            args = parser.parse_args()
+
+            offside = (args['p'] * args['rp']) - args['rp']
+            qry = pembelian.query
+
+            if args['id_pembeli'] is not None:
+                qry = qry.filter(pembelian.id_pembeli.like("%"+args['id_pembeli']+"%"))
+            if args['id_cart'] is not None:
+                qry = qry.filter(pembelian.id_cart.like("%"+args['id_cart']+"%"))
+            if args['id_toko'] is not None:
+                qry = qry.filter(pembelian.id_toko.like("%"+args['id_toko']+"%"))
+
+            rows = []
+            for row in qry.limit(args['rp']).offset(offside).all():
+                rows.append(marshal(row, Pembelian.response_field))
+
+            return rows, 200, {'Content_type' : 'application/json'}
+        else:
+            qry = Pembelian.query.get(id_pembelian)
+            if qry is not None:
+                return marshal(qry, Pembelian.response_field), 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+    
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('id_pembeli', location = 'json', required = True)
+        parser.add_argument('id_cart', location = 'json', required = True)
+        parser.add_argument('id_buku', location = 'json', required = True)
+        parser.add_argument('jumlah', location = 'json', required = True)
+        parser.add_argument('total_harga', location = 'json', required = True)
+        parser.add_argument('id_toko', location = 'json', required = True)
+        parser.add_argument('id_metode_pengiriman', location = 'json', required = True)
+        parser.add_argument('nomor_resi', location='json')
+        args = parser.parse_args()
+
+        created_at = datetime.datetime.now()
+        updated_at = datetime.datetime.now()
+
+        pembelians = pembelian(None, args['id_pembeli'], args['id_cart'], args['id_buku'], args['jumlah'], args['total_harga'], args['id_toko'], args['id_metode_pengiriman'], args['nomor_resi'], created_at, updated_at)
+        db.session.add(pembelians)
+        db.session.commit()
+
+        return marshal(pembelians, Pembelian.response_field), 200, {'Content_type' : 'application/json'}
+
+    def delete(self, id_pembelian):
+        qry = Pembelian.query.get(id_pembelian)
+        
+        db.session.delete(qry)
+        db.session.commit()
+
+        if qry is not None:
+            return 'Deleted', 200, {'Content_type' : 'application/json'}
+        else:
+            return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+
+    def put(self, id_pembelian):
+        qry = Pembelian.query.get(id_pembelian)
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('nomor_resi', location = 'json')
+        args = parser.parse_args()
+        
+        qry.nomor_resi = args['nomor_resi']
+
+        qry.updated_at = datetime.datetime.now()
+
+        db.session.commit()
+        if qry is not None:
+            return marshal(qry, Pembelian.response_field), 200, {'Content_type' : 'application/json'}
+        else:
+            return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+
+
+api.add_resource(PembelianResource, '', '/<int:id_pembelian>')

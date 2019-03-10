@@ -51,12 +51,12 @@ from blueprints.detail_member.resources import bp_detail_member
 from blueprints.metode_pengiriman.resources import bp_metode_pengiriman
 from blueprints.toko.resources import bp_toko
 from blueprints.detail_toko.resources import bp_detail_toko
-# from blueprints.buku.resources import bp_buku
-# from blueprints.detail_buku.resources import bp_detail_buku
+from blueprints.buku.resources import bp_buku
+from blueprints.detail_buku.resources import bp_detail_buku
 from blueprints.metode_pembayaran.resources import bp_metode_pembayaran
-# from blueprints.cart.resources import bp_cart
-# from blueprints.pembelian.resources import bp_pembelian
-# from blueprints.transaction.resources import bp_transaction
+from blueprints.cart.resources import bp_cart
+from blueprints.pembelian.resources import bp_pembelian
+from blueprints.transaksi.resources import bp_transaksi
 # from blueprints.admin.resources import bp_admin
 from blueprints.auth import bp_auth
 
@@ -65,12 +65,12 @@ app.register_blueprint(bp_detail_member, url_prefix='/detail_member')
 app.register_blueprint(bp_metode_pengiriman, url_prefix='/metode_pengiriman')
 app.register_blueprint(bp_toko, url_prefix='/toko')
 app.register_blueprint(bp_detail_toko, url_prefix='/detail_toko')
-# app.register_blueprint(bp_buku, url_prefix='/buku')
-# app.register_blueprint(bp_detail_buku, url_prefix='/detail_buku')
+app.register_blueprint(bp_buku, url_prefix='/buku')
+app.register_blueprint(bp_detail_buku, url_prefix='/toko/buku/detail_buku')
 app.register_blueprint(bp_metode_pembayaran, url_prefix='/metode_pembayaran')
-# app.register_blueprint(bp_cart, url_prefix='/cart')
-# app.register_blueprint(bp_pembelian, url_prefix='/pembelian')
-# app.register_blueprint(bp_transaction, url_prefix='/transaksi')
+app.register_blueprint(bp_cart, url_prefix='/cart')
+app.register_blueprint(bp_pembelian, url_prefix='/pembelian')
+app.register_blueprint(bp_transaksi, url_prefix='/transaksi')
 # app.register_blueprint(bp_admin, url_prefix='/admin')
 app.register_blueprint(bp_auth, url_prefix='/login')
 

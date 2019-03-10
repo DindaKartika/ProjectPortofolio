@@ -6,13 +6,13 @@ class DetailBuku(db.Model):
 
     __tablename__ = "detail_buku"
 
-    id_detail_buku = db.Column(db.Integer, primary_key = True, autoincrement = True)
-    id_buku = db.Column(db.Integer)
+    id_detail_buku = db.Column(db.Integer, primary_key = True)
+    id_buku = db.Column(db.Integer, unique = True)
     isbn = db.Column(db.String(255))
     penulis = db.Column(db.String(255))
     penerbit = db.Column(db.String(255))
     jumlah_halaman = db.Column(db.Integer)
-    sinopsis = db.Column(db.Text)
+    sinopsis = db.Column(db.String(2000))
     stok = db.Column(db.Integer)
     created_at= db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
@@ -25,7 +25,7 @@ class DetailBuku(db.Model):
         'penulis' : fields.String,
         'penerbit' : fields.String,
         'jumlah_halaman' : fields.String,
-        'sinopsis' : fields.Text,
+        'sinopsis' : fields.String,
         'stok' : fields.Integer,
         'created_at' : fields.DateTime,
         'updated_at' : fields.DateTime
@@ -37,7 +37,7 @@ class DetailBuku(db.Model):
         self.isbn = isbn
         self.penulis = penulis
         self.penerbit = penerbit
-        self.jumlah_halaman = telepon
+        self.jumlah_halaman = jumlah_halaman
         self.sinopsis = sinopsis
         self.stok = stok
         self.created_at = created_at

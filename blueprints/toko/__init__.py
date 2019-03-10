@@ -3,8 +3,8 @@ from blueprints import db
 from flask_restful import fields
 
 from blueprints.detail_toko import *
-from blueprints.toko import *
 from blueprints.pembelian import *
+from blueprints.buku import *
 
 class Toko(db.Model):
 

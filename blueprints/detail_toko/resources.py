@@ -15,40 +15,6 @@ class DetailTokoResource(Resource):
     def __init__(self):
         pass
 
-    # @jwt_required
-    # def get(self, id_detail_toko = None):
-    #     if id_detail_toko == None:
-    #         jwtClaim = get_jwt_claims()
-    #         if jwtClaim['status'] == 'admin':
-    #             parser = reqparse.RequestParser()
-    #             parser.add_argument('p', type = int, location = 'args', default = 1)
-    #             parser.add_argument('rp', type = int, location = 'args', default = 5)
-    #             parser.add_argument('kota', type = str, location = 'args')
-    #             parser.add_argument('id_toko', type = str, location = 'args')
-    #             args = parser.parse_args()
-
-    #             offside = (args['p'] * args['rp']) - args['rp']
-    #             qry = DetailToko.query
-
-    #             if args['kota'] is not None:
-    #                 qry = qry.filter(DetailToko.kota.like("%"+args['kota']+"%"))
-    #             if args['id_toko'] is not None:
-    #                 qry = qry.filter(DetailToko.id_toko.like("%"+args['id_toko']+"%"))
-
-    #             rows = []
-    #             for row in qry.limit(args['rp']).offset(offside).all():
-    #                 rows.append(marshal(row, DetailToko.response_field))
-
-    #             return rows, 200, {'Content_type' : 'application/json'}
-    #         else:
-    #             return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
-    #     else:
-    #         qry = DetailToko.query.get(id_detail_toko)
-    #         if qry is not None:
-    #             return marshal(qry, DetailToko.response_field), 200, {'Content_type' : 'application/json'}
-    #         else:
-    #             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
-    
     @jwt_required
     def post(self):
         jwtClaim = get_jwt_claims()

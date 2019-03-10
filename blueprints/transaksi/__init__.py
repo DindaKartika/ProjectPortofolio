@@ -2,6 +2,8 @@ import random, logging
 from blueprints import db
 from flask_restful import fields
 
+from blueprints.cart import *
+
 class Transaksi(db.Model):
 
     __tablename__ = "transaksi"

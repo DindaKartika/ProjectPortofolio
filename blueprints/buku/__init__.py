@@ -2,6 +2,8 @@ import random, logging
 from blueprints import db
 from flask_restful import fields
 
+from blueprints.toko import *
+
 class Buku(db.Model):
 
     __tablename__ = "buku"
@@ -28,13 +30,13 @@ class Buku(db.Model):
         'kategori' : fields.String,
         'gambar' : fields.String,
         'kode_promo' : fields.String,
-        'kondisi' : fiedls.String,
+        'kondisi' : fields.String,
         'status' : fields.String,
         'created_at' : fields.DateTime,
         'updated_at' : fields.DateTime
     }
 
-    def __init__(self, id_buku, id_toko, judul_buku, harga, kategori, gambar, kode_prome, kondisi, status, created_at, updated_at):
+    def __init__(self, id_buku, id_toko, judul_buku, harga, kategori, gambar, kode_promo, kondisi, status, created_at, updated_at):
         self.id_buku = id_buku
         self.id_toko = id_toko
         self.judul_buku = judul_buku

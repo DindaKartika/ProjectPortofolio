@@ -88,4 +88,4 @@ class CartResource(Resource):
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
 
-api.add_resource(cartResource, '', '/<int:id_cart>')
+api.add_resource(CartResource, '', '/<int:id_cart>')
