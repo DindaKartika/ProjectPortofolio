@@ -2,6 +2,10 @@ import random, logging
 from blueprints import db
 from flask_restful import fields
 
+from blueprints.detail_toko import *
+from blueprints.toko import *
+from blueprints.pembelian import *
+
 class Toko(db.Model):
 
     __tablename__ = "toko"

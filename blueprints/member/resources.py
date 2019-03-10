@@ -23,13 +23,10 @@ class MemberResource(Resource):
         qry = Member.query.get(id_member)
         member = marshal(qry, Member.response_field)
         details = DetailMember.query.get(qry.id_member)
-        
-        rows = []
-        for row in details:
-            member['detail'] = marshal(row, DetailMember.response_field)
-            rows.append(member)
+        member['detail'] = marshal(details, DetailMember.response_field)
+
         if qry is not None:
-            return rows, 200, {'Content_type' : 'application/json'}
+            return member, 200, {'Content_type' : 'application/json'}
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 

@@ -95,11 +95,15 @@ class MyTokoResource(Resource):
 
     @jwt_required
     def delete(self):
-        jwtClaim == get_jwt_claims()
+        jwtClaim = get_jwt_claims()
 
         id_member = jwtClaim['id_member']
 
         qry = Toko.query.get(id_member)
+
+        details = DetailToko.query.get(qry.id_toko)
+
+        db.session.delete(details)
         db.session.delete(qry)
         db.session.commit()
 

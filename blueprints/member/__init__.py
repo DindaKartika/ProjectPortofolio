@@ -2,6 +2,8 @@ import random, logging
 from blueprints import db
 from flask_restful import fields
 
+from blueprints.detail_member import *
+
 class Member(db.Model):
 
     __tablename__ = "member"

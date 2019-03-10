@@ -2,7 +2,9 @@ import random, logging
 from blueprints import db
 from flask_restful import fields
 
-class AlamatToko(db.Model):
+from blueprints.toko import *
+
+class DetailToko(db.Model):
 
     __tablename__ = "alamat_toko"
 
@@ -38,4 +40,4 @@ class AlamatToko(db.Model):
         self.updated_at = updated_at
 
     def __repr__(self):
-        return '<AlamatToko%r>' % self.id_alamat_toko
+        return '<DetailToko%r>' % self.id_alamat_toko
