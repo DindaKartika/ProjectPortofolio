@@ -1,7 +1,8 @@
 import json, logging
 from flask import Blueprint
 from flask_restful import Api, Resource, reqparse, marshal
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_claims
+import datetime
 
 from . import *
 
@@ -13,7 +14,10 @@ class TransaksiResource(Resource):
     def __init__(self):
         pass
 
+    @jwt_required
     def get(self, id_transaksi = None):
+        jwtClaim = get_jwt_claims()
+        
         if id_transaksi == None:
             parser = reqparse.RequestParser()
             parser.add_argument('p', type = int, location = 'args', default = 1)
@@ -22,14 +26,13 @@ class TransaksiResource(Resource):
             args = parser.parse_args()
 
             offside = (args['p'] * args['rp']) - args['rp']
-            qry = Transaksi.query
 
-            if args['status'] is not None:
-                qry = qry.filter(Transaksi.status.like("%"+args['status']+"%"))
+            carts = Cart.query.filter(Cart.id_pembeli == jwtClaim['id_member']).all()
 
             rows = []
-            for row in qry.limit(args['rp']).offset(offside).all():
-                rows.append(marshal(row, Transaksi.response_field))
+            for row in carts:
+                qry = Transaksi.query.filter(Transaksi.id_cart == row.id_cart).first()
+                rows.append(marshal(qry, Transaksi.response_field))
 
             return rows, 200, {'Content_type' : 'application/json'}
         else:
@@ -39,6 +42,7 @@ class TransaksiResource(Resource):
             else:
                 return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
     
+    @jwt_required
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('id_cart', location = 'json', required = True)
@@ -54,33 +58,5 @@ class TransaksiResource(Resource):
         db.session.commit()
 
         return marshal(transaksis, Transaksi.response_field), 200, {'Content_type' : 'application/json'}
-
-    def delete(self, id_transaksi):
-        qry = Transaksi.query.get(id_transaksi)
-        
-        db.session.delete(qry)
-        db.session.commit()
-
-        if qry is not None:
-            return 'Deleted', 200, {'Content_type' : 'application/json'}
-        else:
-            return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
-
-    def put(self, id_transaksi):
-        qry = Transaksi.query.get(id_transaksi)
-
-        parser = reqparse.RequestParser()
-        parser.add_argument('status', location = 'json')
-        args = parser.parse_args()
-        
-        qry.status = args['status']
-        qry.updated_at = datetime.datetime.now()
-
-        db.session.commit()
-        if qry is not None:
-            return marshal(qry, Transaksi.response_field), 200, {'Content_type' : 'application/json'}
-        else:
-            return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
-
 
 api.add_resource(TransaksiResource, '', '/<int:id_transaksi>')

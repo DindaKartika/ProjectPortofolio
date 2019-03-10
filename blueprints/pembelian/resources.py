@@ -1,7 +1,8 @@
 import json, logging
 from flask import Blueprint
 from flask_restful import Api, Resource, reqparse, marshal
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_claims
+import datetime
 
 from . import *
 
@@ -13,62 +14,59 @@ class PembelianResource(Resource):
     def __init__(self):
         pass
 
-    def get(self, id_pembelian = None):
-        if id_pembelian == None:
-            parser = reqparse.RequestParser()
-            parser.add_argument('p', type = int, location = 'args', default = 1)
-            parser.add_argument('rp', type = int, location = 'args', default = 5)
-            parser.add_argument('id_pembeli', type = str, location = 'args')
-            parser.add_argument('id_cart', type=str, location = 'args')
-            parser.add_argument('id_toko', type=str, location = 'args')
-            args = parser.parse_args()
-
-            offside = (args['p'] * args['rp']) - args['rp']
-            qry = pembelian.query
-
-            if args['id_pembeli'] is not None:
-                qry = qry.filter(pembelian.id_pembeli.like("%"+args['id_pembeli']+"%"))
-            if args['id_cart'] is not None:
-                qry = qry.filter(pembelian.id_cart.like("%"+args['id_cart']+"%"))
-            if args['id_toko'] is not None:
-                qry = qry.filter(pembelian.id_toko.like("%"+args['id_toko']+"%"))
-
-            rows = []
-            for row in qry.limit(args['rp']).offset(offside).all():
-                rows.append(marshal(row, Pembelian.response_field))
-
-            return rows, 200, {'Content_type' : 'application/json'}
+    @jwt_required
+    def get(self, id_pembelian):
+        qry = Pembelian.query.get(id_pembelian)
+        if qry is not None:
+            return marshal(qry, Pembelian.response_field), 200, {'Content_type' : 'application/json'}
         else:
-            qry = Pembelian.query.get(id_pembelian)
-            if qry is not None:
-                return marshal(qry, Pembelian.response_field), 200, {'Content_type' : 'application/json'}
-            else:
-                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+            return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
     
+    @jwt_required
     def post(self):
+        jwtClaim = get_jwt_claims()
+
         parser = reqparse.RequestParser()
-        parser.add_argument('id_pembeli', location = 'json', required = True)
-        parser.add_argument('id_cart', location = 'json', required = True)
         parser.add_argument('id_buku', location = 'json', required = True)
         parser.add_argument('jumlah', location = 'json', required = True)
-        parser.add_argument('total_harga', location = 'json', required = True)
-        parser.add_argument('id_toko', location = 'json', required = True)
         parser.add_argument('id_metode_pengiriman', location = 'json', required = True)
-        parser.add_argument('nomor_resi', location='json')
         args = parser.parse_args()
+
+        bukus = Buku.query.get(args['id_buku'])
+        total_harga = int(args['jumlah']) * int(bukus.harga)
+        args['nomor_resi'] = 0
 
         created_at = datetime.datetime.now()
         updated_at = datetime.datetime.now()
 
-        pembelians = pembelian(None, args['id_pembeli'], args['id_cart'], args['id_buku'], args['jumlah'], args['total_harga'], args['id_toko'], args['id_metode_pengiriman'], args['nomor_resi'], created_at, updated_at)
+        carts = Cart.query.filter(Cart.id_pembeli==jwtClaim['id_member']).filter(Cart.status == "unfinished").first()
+        if carts is None:
+            id_pembeli = jwtClaim['id_member']
+            total_barang = args['jumlah']
+            total_pembayaran = str(total_harga)
+            status = "unfinished"
+
+            cart_jadi = Cart(None, id_pembeli, total_barang, total_pembayaran, status, created_at, updated_at)
+            db.session.add(cart_jadi)
+            db.session.commit()
+            carts = Cart.query.filter(Cart.id_pembeli==jwtClaim['id_member']).filter(Cart.status == "unfinished").first()
+
+        else:
+
+            carts.total_barang = carts.total_barang + args['jumlah']
+            carts.total_pembayaran = str(carts.total_pembayaran + total_harga)
+            db.session.commit()
+
+        pembelians = Pembelian(None, carts.id_cart, args['id_buku'], args['jumlah'], total_harga, bukus.id_toko, args['id_metode_pengiriman'], args['nomor_resi'], created_at, updated_at)
         db.session.add(pembelians)
         db.session.commit()
 
         return marshal(pembelians, Pembelian.response_field), 200, {'Content_type' : 'application/json'}
 
+    @jwt_required
     def delete(self, id_pembelian):
         qry = Pembelian.query.get(id_pembelian)
-        
+
         db.session.delete(qry)
         db.session.commit()
 
@@ -77,4 +75,4 @@ class PembelianResource(Resource):
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
-api.add_resource(PembelianResource, '', '/<int:id_pembelian>')
+api.add_resource(PembelianResource, '/me', '/me/<int:id_pembelian>')

@@ -3,13 +3,13 @@ from blueprints import db
 from flask_restful import fields
 
 from blueprints.cart import *
+from blueprints.buku import *
 
 class Pembelian(db.Model):
 
     __tablename__ = "pembelian"
 
     id_pembelian = db.Column(db.Integer, primary_key = True, autoincrement = True)
-    id_pembeli = db.Column(db.Integer)
     id_cart = db.Column(db.Integer)
     id_buku = db.Column(db.Integer)
     jumlah = db.Column(db.String(255), unique = True)
@@ -23,7 +23,6 @@ class Pembelian(db.Model):
 
     response_field = {
         'id_pembelian' : fields.Integer,
-        'id_pembeli' : fields.String,
         'id_cart' : fields.String,
         'id_buku' : fields.String,
         'jumlah' : fields.String,
@@ -35,9 +34,8 @@ class Pembelian(db.Model):
         'updated_at' : fields.DateTime
     }
 
-    def __init__(self, id_pembelian, id_pembeli, id_cart, id_buku, jumlah, total_harga, id_toko, id_metode_pengiriman, nomor_resi, created_at, updated_at):
+    def __init__(self, id_pembelian, id_cart, id_buku, jumlah, total_harga, id_toko, id_metode_pengiriman, nomor_resi, created_at, updated_at):
         self.id_pembelian = id_pembelian
-        self.id_pembeli = id_pembeli
         self.id_cart = id_cart
         self.id_buku = id_buku
         self.jumlah = jumlah

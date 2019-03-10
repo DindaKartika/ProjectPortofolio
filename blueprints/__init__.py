@@ -57,7 +57,7 @@ from blueprints.metode_pembayaran.resources import bp_metode_pembayaran
 from blueprints.cart.resources import bp_cart
 from blueprints.pembelian.resources import bp_pembelian
 from blueprints.transaksi.resources import bp_transaksi
-# from blueprints.admin.resources import bp_admin
+from blueprints.admin.resources import bp_admin
 from blueprints.auth import bp_auth
 
 app.register_blueprint(bp_member, url_prefix='/member')
@@ -70,8 +70,8 @@ app.register_blueprint(bp_detail_buku, url_prefix='/toko/buku/detail_buku')
 app.register_blueprint(bp_metode_pembayaran, url_prefix='/metode_pembayaran')
 app.register_blueprint(bp_cart, url_prefix='/cart')
 app.register_blueprint(bp_pembelian, url_prefix='/pembelian')
-app.register_blueprint(bp_transaksi, url_prefix='/transaksi')
-# app.register_blueprint(bp_admin, url_prefix='/admin')
+app.register_blueprint(bp_transaksi, url_prefix='/transaksi/me')
+app.register_blueprint(bp_admin, url_prefix='/admin')
 app.register_blueprint(bp_auth, url_prefix='/login')
 
 db.create_all()

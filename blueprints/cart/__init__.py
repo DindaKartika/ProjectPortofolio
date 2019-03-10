@@ -9,8 +9,9 @@ class Cart(db.Model):
     __tablename__ = "cart"
 
     id_cart = db.Column(db.Integer, primary_key = True, autoincrement = True)
+    id_pembeli = db.Column(db.Integer)
     total_barang = db.Column(db.String(255), unique = True)
-    total_pembayaran = db.Column(db.String(255), unique = True)
+    total_pembayaran = db.Column(db.Integer, unique = True)
     status = db.Column(db.String(50))
     created_at= db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
@@ -19,6 +20,7 @@ class Cart(db.Model):
 
     response_field = {
         'id_cart' : fields.Integer,
+        'id_pembeli' : fields.Integer,
         'total_barang' : fields.String,
         'total_pembayaran' : fields.String,
         'status' : fields.String,
@@ -26,8 +28,9 @@ class Cart(db.Model):
         'updated_at' : fields.DateTime
     }
 
-    def __init__(self, id_cart, total_barang, total_pembayaran, status, created_at, updated_at):
+    def __init__(self, id_cart, id_pembeli, total_barang, total_pembayaran, status, created_at, updated_at):
         self.id_cart = id_cart
+        self.id_pembeli = id_pembeli
         self.total_barang = total_barang
         self.total_pembayaran = total_pembayaran
         self.status = status

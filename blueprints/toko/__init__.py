@@ -5,6 +5,7 @@ from flask_restful import fields
 from blueprints.detail_toko import *
 from blueprints.pembelian import *
 from blueprints.buku import *
+from blueprints.member import *
 
 class Toko(db.Model):
 

@@ -6,8 +6,39 @@ import datetime
 
 from . import *
 
-bp_member = Blueprint('member', __name__)
-api = Api(bp_member)
+bp_admin = Blueprint('admin', __name__)
+api = Api(bp_admin)
+
+class AdminResource(Resource):
+
+    def __init__(self):
+        pass
+    
+    @jwt_required
+    def post(self):
+        jwtClaim = get_jwt_claims()
+        if jwtClaim['status'] == 'admin':
+            parser = reqparse.RequestParser()
+            parser.add_argument('nama_depan', location = 'json', required = True)
+            parser.add_argument('nama_belakang', location = 'json', required = True)
+            parser.add_argument('username', location = 'json', required = True)
+            parser.add_argument('email', location = 'json', required = True)
+            parser.add_argument('password', location = 'json', required = True)
+            args = parser.parse_args()
+
+            args['status'] = "admin"
+            args['created_at'] = datetime.datetime.now()
+            args['updated_at'] = datetime.datetime.now()
+
+            members = Member(None, args['nama_depan'], args['nama_belakang'], args['username'], args['email'], args['password'], args['status'], args['created_at'], args['updated_at'])
+            db.session.add(members)
+            db.session.commit()
+
+            return marshal(members, Member.response_field), 200, {'Content_type' : 'application/json'}
+        else:
+            return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
+
+api.add_resource(AdminResource, '/new')
 
 class MemberResource(Resource):
 
@@ -21,16 +52,13 @@ class MemberResource(Resource):
             if jwtClaims['status'] == 'admin':
                 parser = reqparse.RequestParser()
                 parser.add_argument('p', type = int, location = 'args', default = 1)
-                parser.add_argument('rp', type = int, location = 'args', default = 5)
-                parser.add_argument('username', type = str, location = 'args')
+                parser.add_argument('rp', type = int, location = 'args', default = 10)
                 parser.add_argument('status', type=str, location = 'args')
                 args = parser.parse_args()
 
                 offside = (args['p'] * args['rp']) - args['rp']
                 qry = Member.query
 
-                if args['username'] is not None:
-                    qry = qry.filter(Member.username.like("%"+args['username']+"%"))
                 if args['status'] is not None:
                     qry = qry.filter(Member.status.like("%"+args['status']+"%"))
 
@@ -40,35 +68,17 @@ class MemberResource(Resource):
 
                 return rows, 200, {'Content_type' : 'application/json'}
             else:
-                return 'Access Denied', 200, {'Content_type' : 'application/json'}
-        else:
-            if jwtClaims['id_member'] == id_member:
-                qry = Member.query.get(id_member)
-                if qry is not None:
-                    return marshal(qry, Member.response_field), 200, {'Content_type' : 'application/json'}
-                else:
-                    return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
-            else:
                 return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
-    
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('nama_depan', location = 'json', required = True)
-        parser.add_argument('nama_belakang', location = 'json', required = True)
-        parser.add_argument('username', location = 'json', required = True)
-        parser.add_argument('email', location = 'json', required = True)
-        parser.add_argument('password', location = 'json', required = True)
-        args = parser.parse_args()
+        else:
+            qry = Member.query.get(id_member)
+            member = marshal(qry, Member.response_field)
+            details = DetailMember.query.get(qry.id_member)
+            member['detail'] = marshal(details, DetailMember.response_field)
 
-        args['status'] = "pembeli"
-        args['created_at'] = datetime.datetime.now()
-        args['updated_at'] = datetime.datetime.now()
-
-        members = Member(None, args['nama_depan'], args['nama_belakang'], args['username'], args['email'], args['password'], args['status'], args['created_at'], args['updated_at'])
-        db.session.add(members)
-        db.session.commit()
-
-        return marshal(members, Member.response_field), 200, {'Content_type' : 'application/json'}
+            if qry is not None:
+                return member, 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
     @jwt_required
     def put(self, id_member):
@@ -82,35 +92,281 @@ class MemberResource(Resource):
             args = parser.parse_args()
 
             qry.status = args['status']
-        elif jwtClaims['id_member'] == id_member:
-            parser = reqparse.RequestParser()
-            parser.add_argument('nama_depan', location = 'json')
-            parser.add_argument('nama_belakang', location = 'json')
-            parser.add_argument('email', location = 'json')
-            parser.add_argument('password', location = 'json')
-            args = parser.parse_args()
             
-            if args['nama_depan'] is not None:
-                qry.nama_depan = args['nama_depan']
-            if args['nama_belakang'] is not None:
-                qry.nama_belakang = args['nama_belakang']
-            if args['email'] is not None:
-                qry.email = args['email']
-            if args['password'] is not None:
-                qry.password = args['password']
+            qry.updated_at = datetime.datetime.now()
+
+            db.session.commit()
+            if qry is not None:
+                return marshal(qry, Member.response_field), 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
         else:
             return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
-            
-        qry.updated_at = datetime.datetime.now()
 
-        db.session.commit()
-        if qry is not None:
-            return marshal(qry, Member.response_field), 200, {'Content_type' : 'application/json'}
+
+api.add_resource(MemberResource, '/member', '/member/<int:id_member>')
+
+class TokoResource(Resource):
+
+    def __init__(self):
+        pass
+
+    @jwt_required
+    def get(self, id_toko = None):
+        jwtClaims = get_jwt_claims()
+        if id_toko == None:
+            if jwtClaims['status'] == 'admin':
+                parser = reqparse.RequestParser()
+                parser.add_argument('p', type = int, location = 'args', default = 1)
+                parser.add_argument('rp', type = int, location = 'args', default = 10)
+                parser.add_argument('status', type=str, location = 'args')
+                args = parser.parse_args()
+
+                offside = (args['p'] * args['rp']) - args['rp']
+                qry = Toko.query
+
+                if args['status'] is not None:
+                    qry = qry.filter(Toko.status.like("%"+args['status']+"%"))
+
+                rows = []
+                for row in qry.limit(args['rp']).offset(offside).all():
+                    rows.append(marshal(row, Toko.response_field))
+
+                return rows, 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
         else:
-            return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+            qry = Toko.query.get(id_toko)
+            toko = marshal(qry, Toko.response_field)
+            details = DetailToko.query.get(qry.id_toko)
+            toko['detail'] = marshal(details, DetailToko.response_field)
+
+            if qry is not None:
+                return toko, 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+
+    @jwt_required
+    def put(self, id_toko):
+        jwtClaims = get_jwt_claims()
+
+        qry = Toko.query.get(id_toko)
+
+        if jwtClaims['status'] == 'admin':
+            parser = reqparse.RequestParser()
+            parser.add_argument('status', location = 'json')
+            args = parser.parse_args()
+
+            qry.status = args['status']
+            
+            qry.updated_at = datetime.datetime.now()
+
+            db.session.commit()
+            if qry is not None:
+                return marshal(qry, Toko.response_field), 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+        else:
+            return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
 
-api.add_resource(MemberResource, '', '/<int:id_member>')
+api.add_resource(TokoResource, '/toko', '/toko/<int:id_toko>')
+
+class BukuResource(Resource):
+
+    def __init__(self):
+        pass
+
+    @jwt_required
+    def get(self, id_buku = None):
+        jwtClaims = get_jwt_claims()
+        if id_buku == None:
+            if jwtClaims['status'] == 'admin':
+                parser = reqparse.RequestParser()
+                parser.add_argument('p', type = int, location = 'args', default = 1)
+                parser.add_argument('rp', type = int, location = 'args', default = 10)
+                parser.add_argument('status', type=str, location = 'args')
+                args = parser.parse_args()
+
+                offside = (args['p'] * args['rp']) - args['rp']
+                qry = Buku.query
+
+                if args['status'] is not None:
+                    qry = qry.filter(Buku.status.like("%"+args['status']+"%"))
+
+                rows = []
+                for row in qry.limit(args['rp']).offset(offside).all():
+                    rows.append(marshal(row, Buku.response_field))
+
+                return rows, 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
+        else:
+            qry = Buku.query.get(id_buku)
+            buku = marshal(qry, Buku.response_field)
+            details = DetailBuku.query.get(qry.id_buku)
+            buku['detail'] = marshal(details, DetailBuku.response_field)
+
+            if qry is not None:
+                return buku, 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+
+    @jwt_required
+    def put(self, id_buku):
+        jwtClaims = get_jwt_claims()
+
+        qry = Buku.query.get(id_buku)
+
+        if jwtClaims['status'] == 'admin':
+            parser = reqparse.RequestParser()
+            parser.add_argument('status', location = 'json')
+            args = parser.parse_args()
+
+            qry.status = args['status']
+            
+            qry.updated_at = datetime.datetime.now()
+
+            db.session.commit()
+            if qry is not None:
+                return marshal(qry, Buku.response_field), 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+        else:
+            return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
+
+
+api.add_resource(BukuResource, '/buku', '/buku/<int:id_buku>')
+
+class CartResource(Resource):
+
+    def __init__(self):
+        pass
+
+    @jwt_required
+    def get(self, id_cart = None):
+        jwtClaims = get_jwt_claims()
+        if id_cart == None:
+            if jwtClaims['status'] == 'admin':
+                parser = reqparse.RequestParser()
+                parser.add_argument('p', type = int, location = 'args', default = 1)
+                parser.add_argument('rp', type = int, location = 'args', default = 10)
+                parser.add_argument('status', type=str, location = 'args')
+                args = parser.parse_args()
+
+                offside = (args['p'] * args['rp']) - args['rp']
+                qry = Cart.query
+
+                if args['status'] is not None:
+                    qry = qry.filter(Cart.status.like("%"+args['status']+"%"))
+
+                rows = []
+                for row in qry.limit(args['rp']).offset(offside).all():
+                    rows.append(marshal(row, Cart.response_field))
+
+                return rows, 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
+        else:
+            qry = Cart.query.get(id_cart)
+            cart = marshal(qry, Cart.response_field)
+            details = Pembelian.query.get(qry.id_cart)
+            cart['detail'] = marshal(details, Pembelian.response_field)
+
+            if qry is not None:
+                return cart, 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+
+    @jwt_required
+    def put(self, id_cart):
+        jwtClaims = get_jwt_claims()
+
+        qry = Cart.query.get(id_cart)
+
+        if jwtClaims['status'] == 'admin':
+            parser = reqparse.RequestParser()
+            parser.add_argument('status', location = 'json')
+            args = parser.parse_args()
+
+            qry.status = args['status']
+            
+            qry.updated_at = datetime.datetime.now()
+
+            db.session.commit()
+            if qry is not None:
+                return marshal(qry, Cart.response_field), 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+        else:
+            return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
+
+
+api.add_resource(CartResource, '/cart', '/cart/<int:id_cart>')
+
+class TransaksiResource(Resource):
+
+    def __init__(self):
+        pass
+
+    @jwt_required
+    def get(self, id_transaksi = None):
+        jwtClaims = get_jwt_claims()
+        if id_transaksi == None:
+            if jwtClaims['status'] == 'admin':
+                parser = reqparse.RequestParser()
+                parser.add_argument('p', type = int, location = 'args', default = 1)
+                parser.add_argument('rp', type = int, location = 'args', default = 10)
+                parser.add_argument('status', type=str, location = 'args')
+                args = parser.parse_args()
+
+                offside = (args['p'] * args['rp']) - args['rp']
+                qry = Transaksi.query
+
+                if args['status'] is not None:
+                    qry = qry.filter(Transaksi.status.like("%"+args['status']+"%"))
+
+                rows = []
+                for row in qry.limit(args['rp']).offset(offside).all():
+                    rows.append(marshal(row, Transaksi.response_field))
+
+                return rows, 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
+        else:
+            qry = Transaksi.query.get(id_transaksi)
+            transaksi = marshal(qry, Transaksi.response_field)
+
+            if qry is not None:
+                return transaksi, 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+
+    @jwt_required
+    def put(self, id_transaksi):
+        jwtClaims = get_jwt_claims()
+
+        qry = Transaksi.query.get(id_transaksi)
+
+        if jwtClaims['status'] == 'admin':
+            parser = reqparse.RequestParser()
+            parser.add_argument('status', location = 'json')
+            args = parser.parse_args()
+
+            qry.status = args['status']
+            
+            qry.updated_at = datetime.datetime.now()
+
+            db.session.commit()
+            if qry is not None:
+                return marshal(qry, Transaksi.response_field), 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+        else:
+            return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
+
+
+api.add_resource(TransaksiResource, '/transaksi', '/transaksi/<int:id_transaksi>')
 
 class MetodePembayaranResource(Resource):
 
@@ -168,7 +424,7 @@ class MetodePembayaranResource(Resource):
         updated_at = datetime.datetime.now()
 
         metode_pembayarans = MetodePembayaran(None, args['metode_pembayaran'], args['instansi'], args['status'], created_at, updated_at)
-        db.session.add(Metode_pembayarans)
+        db.session.add(metode_pembayarans)
         db.session.commit()
 
         return marshal(metode_pembayarans, MetodePembayaran.response_field), 200, {'Content_type' : 'application/json'}
@@ -200,12 +456,15 @@ class MetodePembayaranResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('metode_pembayaran', location = 'json')
         parser.add_argument('instansi', location = 'json')
+        parser.add_argument('status', location = 'json')
         args = parser.parse_args()
         
         if args['metode_pembayaran'] is not None:
             qry.metode_pembayaran = args['metode_pembayaran']
         if args['instansi'] is not None:
             qry.instansi = args['instansi']
+        if args['status'] is not None:
+            qry.status = args['status']
 
         qry.updated_at = datetime.datetime.now()
 
@@ -218,7 +477,7 @@ class MetodePembayaranResource(Resource):
         #     return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
 
-api.add_resource(MetodePembayaranResource, '', '/<int:id_metode_pembayaran>')
+api.add_resource(MetodePembayaranResource, '/metode_pembayaran', '/metode_pembayaran/<int:id_metode_pembayaran>')
 
 class MetodePengirimanResource(Resource):
 
@@ -308,12 +567,15 @@ class MetodePengirimanResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('metode', location = 'json')
         parser.add_argument('kurir', location = 'json')
+        parser.add_argument('status', location = 'json')
         args = parser.parse_args()
         
         if args['metode'] is not None:
             qry.metode = args['metode']
         if args['kurir'] is not None:
             qry.kurir = args['kurir']
+        if args['status'] is not None:
+            qry.status = args['status']
 
         qry.updated_at = datetime.datetime.now()
 
@@ -326,4 +588,4 @@ class MetodePengirimanResource(Resource):
         #     return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
 
-api.add_resource(MetodePengirimanResource, '', '/<int:id_metode_pengiriman>')
+api.add_resource(MetodePengirimanResource, '/metode_pengiriman', '/metode_pengiriman/<int:id_metode_pengiriman>')
