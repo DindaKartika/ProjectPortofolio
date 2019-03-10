@@ -1,0 +1,8 @@
+header public:
+-index
+-signup
+
+header member:
+
+both:
+-kategori

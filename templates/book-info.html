@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/jquery.min.jss"></script>
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,600,700,800" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,600,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700" rel="stylesheet">
+    <title>BukuKu</title>
+  </head>
+  <body>
+    <header>
+      <div class="container-fluid">
+        <div class="header-atas d-md-block d-none">
+          <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-5"></div>
+            <div class="col-md-5">
+              <ul class="nav">
+                <li class="nav-item nav-atas"><a href="promosi.html" class="nav-link">Promo</a></li>
+                <li class="nav-item nav-atas"><a href="start-shop.html" class="nav-link">Mulai Berjualan</a></li>
+                <li class="nav-item nav-atas"><a href="help.html" class="nav-link">Pusat Bantuan</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="header-bawah">
+          <div class="row">
+            <div class="col-md-2 col-sm-6">
+                <h1><a href="index.html">BukuKu</a></h1>
+            </div>
+            <div class="col-md-3 col-sm-6">
+              <form action="search.html">
+                <input type="text" name="search" placeholder="search">
+              </form>
+            </div>
+            <div class="col-md-3"></div>
+            <div class="col-md-4">
+              <ul class="nav">
+                <li class="nav-item nav-bawah"><button onclick="open_explore()" id="btn-explore">Explore</button></li>
+                <li class="nav-item nav-bawah"><a href="cart.html" class="nav-link">Cart</a></li>
+                <li class="nav-item nav-bawah"><button onclick="login()">Log In</button></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="header-hidden" id="isi-explore-big" style="display:none">
+          <div class="row">
+            <div class="col-md-4 d-md-block d-none">
+              <h1>Kategori</h1>
+              <div class="row isi-header-hidden">
+                <div class="col-md-4 col-sm-6">
+                  <span><a href="kategori.html">Novel</a></span>
+                  <br>
+                  <span><a href="kategori.html">Biografi</a></span>
+                  <br>
+                  <span><a href="kategori.html">Misteri</a></span>
+                  <br>
+                  <span><a href="kategori.html">Agama</a></span>
+                  <br>
+                  <span><a href="kategori.html">Anak-Anak</a></span>
+                  <br>
+                  <span><a href="kategori.html">Ekonomi</a></span>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                  <span><a href="kategori.html">Ebook</a></span>
+                  <br>
+                  <span><a href="kategori.html">Politik</a></span>
+                  <br>
+                  <span><a href="kategori.html">Bahasa</a></span>
+                  <br>
+                  <span><a href="kategori.html">Majalah</a></span>
+                  <br>
+                  <span><a href="kategori.html">Hukum</a></span>
+                  <br>
+                  <span><a href="kategori.html">Sastra</a></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 d-md-block d-none">
+              <h1>Penulis</h1>
+              <div class="row isi-header-hidden">
+                <div class="col-md-4 col-sm-6">
+                  <span><a href="kategori.html">AleaZalea</a></span>
+                  <br>
+                  <span><a href="kategori.html">Ilana Tan</a></span>
+                  <br>
+                  <span><a href="kategori.html">Dahlan Iskan</a></span>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                  <span><a href="kategori.html">Wulan Fadi</a></span>
+                  <br>
+                  <span><a href="kategori.html">Dee Lestari</a></span>
+                  <br>
+                  <span><a href="kategori.html">Crowdstoria</a></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 d-md-block d-none">
+              <h1>Penerbit</h1>
+              <div class="row isi-header-hidden">
+                <div class="col-md-4 col-sm-6">
+                  <span><a href="kategori.html">Gramedia Pustaka Utama</a></span>
+                  <br>
+                  <span><a href="kategori.html">Bentang Pustaka</a></span>
+                  <br>
+                  <span><a href="kategori.html">AE Publisher</a></span>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                  <span><a href="kategori.html">Mizan</a></span>
+                  <br>
+                  <span><a href="kategori.html">EdWrite Publisher</a></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-4 d-md-none d-block">
+              <button onclick="open_kategori()">Kategori</button>
+            </div>
+            <div class="col-4 d-md-none d-block">
+              <button onclick="open_penulis()">Penulis</button>
+            </div>
+            <div class="col-4 d-md-none d-block">
+              <button onclick="open_penerbit()">Penerbit</button>
+            </div>
+            <div class="col-12 isi-explore" id="isi-kategori" style="display: none;">
+              <div class="row">
+                <div class="col-6">
+                  <span><a href="kategori.html">Novel</a></span>
+                  <br>
+                  <span><a href="kategori.html">Biografi</a></span>
+                  <br>
+                  <span><a href="kategori.html">Misteri</a></span>
+                  <br>
+                  <span><a href="kategori.html">Agama</a></span>
+                  <br>
+                  <span><a href="kategori.html">Anak-Anak</a></span>
+                  <br>
+                  <span><a href="kategori.html">Ekonomi</a></span>
+                </div>
+                <div class="col-6">
+                  <span><a href="kategori.html">Ebook</a></span>
+                  <br>
+                  <span><a href="kategori.html">Politik</a></span>
+                  <br>
+                  <span><a href="kategori.html">Bahasa</a></span>
+                  <br>
+                  <span><a href="kategori.html">Majalah</a></span>
+                  <br>
+                  <span><a href="kategori.html">Hukum</a></span>
+                  <br>
+                  <span><a href="kategori.html">Sastra</a></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 isi-explore" id="isi-penulis" style="display: none;">
+              <div class="row">
+                <div class="col-6">
+                  <span><a href="kategori.html">AleaZalea</a></span>
+                  <br>
+                  <span><a href="kategori.html">Ilana Tan</a></span>
+                  <br>
+                  <span><a href="kategori.html">Dahlan Iskan</a></span>
+                </div>
+                <div class="col-6">
+                  <span><a href="kategori.html">Wulan Fadi</a></span>
+                  <br>
+                  <span><a href="kategori.html">Dee Lestari</a></span>
+                  <br>
+                  <span><a href="kategori.html">Crowdstoria</a></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 isi-explore" id="isi-penerbit" style="display: none;">
+              <div class="row">
+                <div class="col-6">
+                  <span><a href="kategori.html">Gramedia Pustaka Utama</a></span>
+                  <br>
+                  <span><a href="kategori.html">Bentang Pustaka</a></span>
+                  <br>
+                  <span><a href="kategori.html">AE Publisher</a></span>
+                </div>
+                <div class="col-6">
+                  <span><a href="kategori.html">Mizan</a></span>
+                  <br>
+                  <span><a href="kategori.html">EdWrite Publisher</a></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal" id="login" style="display:none;">
+          <div class="modal-content">
+            <div class="exit"><img onclick="close_login()" src="assets/image/icon/exit.png"></div>
+            <h1>Log In</h1>
+            <hr>
+            <form>
+              <label for="username">Username</label>
+              <br>
+              <input type="text" name="username" required>
+              <br>
+              <label for="password">Password</label>
+              <br>
+              <input type="password" name="password" required>
+              <br>
+              <span><a href="lupa-pass.html">Lupa Password?</a></span>
+              <br>
+              <button type="submit">Masuk</button>
+            </form>
+            <span>Belum Punya Akun?</span>
+            <a href="signup.html"><button>Daftar</button></a>
+          </div>
+        </div>
+      </div>
+    </header>
+    <section class="isi-book-info">
+        <div class="info-box">
+            <h1>Info Buku</h1>
+            <hr>
+            <form action="#">
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for=judul">Judul</label>
+                    </div>
+                    <div class="col-md-10">
+                        <input type="text" name=judul" id=judul" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="harga">Harga</label>
+                    </div>
+                    <div class="col-md-10">
+                        <input type="text" name="harga" id="harga" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="kategori">Kategori</label>
+                    </div>
+                    <div class="col-md-10">
+                        <input type="text" name="kategori" id="kategori"required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="gambar">Gambar</label>
+                    </div>
+                    <div class="col-md-10">
+                        <input type="text" name="gambar" id="gambar"required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="kode-promo">Kode Promo</label>
+                    </div>
+                    <div class="col-md-10">
+                        <input type="text" name="kode-promo" id="kode-promo"required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <label>Kondisi</label>
+                    </div>
+                    <div class="col-md-10">
+                        <input type="radio" name="kondisi" value="baru" id="kondisi">Baru
+                        <br>
+                        <input type="radio" name="kondisi" value="bekas" id="kondisi">Bekas
+                    </div>
+                </div>
+                <button type="submit">Simpan</button>
+            </form>
+            <hr>
+            <form action="home.html">
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="isbn">ISBN</label>
+                    </div>
+                    <div class="col-md-10">
+                        <input type="text" name="isbn" id="isbn" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="penulis">Penulis</label>
+                    </div>
+                    <div class="col-md-10">
+                        <input type="text" name="penulis" id="penulis" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="penerbit">Penerbit</label>
+                    </div>
+                    <div class="col-md-10">
+                        <input type="text" name="penerbit" id="penerbit"required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="jumlah_halaman">Jumlah Halaman</label>
+                    </div>
+                    <div class="col-md-10">
+                        <input type="text" name="jumlah_halaman" id="jumlah_halaman"required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="sinopsis">Sinopsis</label>
+                    </div>
+                    <div class="col-md-10">
+                        <input type="text" name="sinopsis" id="sinopsis"required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="stok">Stok</label>
+                    </div>
+                    <div class="col-md-10">
+                        <input type="text" name="stok" id="stok"required>
+                    </div>
+                </div>
+                <button type="submit">Simpan</button>
+            </form>
+        </div>
+    </section>
+    <footer>
+      <div class="container-fluid">
+        <div class="footer-atas">
+          <div class="row">
+            <div class="col-md-3 d-md-block d-none">
+              <h2>BukuKu</h2>
+              <span><a href="tentang-kami.html">Tentang Kami</a></span>
+              <br>
+              <span><a href="kisah-penjual.html">Kisah Penjual</a></span>
+              <br>
+              <span><a href="official-publisher.html">Official Publisher</a></span>
+              <br>
+              <span><a href="kegiatan-kami.html">Kegiatan Kami</a></span>
+            </div>
+            <div class="col-md-3 d-md-block d-none">
+              <h2>Beli</h2>
+              <span><a href="cara-belanja.html">Cara Belanja</a></span>
+              <br>
+              <span><a href="pembayaran.html">Pembayaran</a></span>
+              <br>
+              <span><a href="pengembalian-dana.html">Pengembalian Dana</a></span>
+              <br>
+              <span><a href="trending.html">Trending</a></span>
+            </div>
+            <div class="col-md-3 d-md-block d-none">
+              <h2>Jual</h2>
+              <span><a href="cara-berjualan.html">Cara Berjualan</a></span>
+              <br>
+              <span><a href="pencairan-dana.html">Pencairan Dana</a></span>
+              <br>
+              <span><a href="register-publisher.html">Daftar Official Publisher</a></span>
+            </div>
+            <div class="col-md-3 d-md-block d-none">
+              <h2>Bantuan</h2>
+              <span><a href="faq.html">FAQ</a></span>
+              <br>
+              <span><a href="contact.html">Hubungi Kami</a></span>
+              <br>
+              <span><a href="complaint.html">Komplain Pesanan</a></span>
+            </div>
+          </div>
+          <div class="row footer-atas-hidden">
+            <div class="col-3 d-sm-block d-md-none">
+              <button onclick="open_bukuku()">BukuKu</button>
+            </div>
+            <div class="col-3 d-sm-block d-md-none">
+              <button onclick="open_beli()">Beli</button>
+            </div>
+            <div class="col-3 d-sm-block d-md-none">
+              <button onclick="open_jual()">Jual</button>
+            </div>
+            <div class="col-3 d-sm-block d-md-none">
+              <button onclick="open_bantuan()">Bantuan</button>
+            </div>
+          </div>
+          <div class="isi-footer-atas" id="isi-bukuku" style="display: none">
+            <span><a href="tentang-kami.html">Tentang Kami</a></span>
+            <br>
+            <span><a href="kisah-penjual.html">Kisah Penjual</a></span>
+            <br>
+            <span><a href="official-publisher.html">Official Publisher</a></span>
+            <br>
+            <span><a href="kegiatan-kami.html">Kegiatan Kami</a></span>
+          </div>
+          <div class="isi-footer-atas" id="isi-beli" style="display: none">
+            <span><a href="cara-belanja.html">Cara Belanja</a></span>
+            <br>
+            <span><a href="pembayaran.html">Pembayaran</a></span>
+            <br>
+            <span><a href="pengembalian-dana.html">Pengembalian Dana</a></span>
+            <br>
+            <span><a href="trending.html">Trending</a></span>
+          </div>
+          <div class="isi-footer-atas" id="isi-jual" style="display: none">
+            <span><a href="cara-berjualan.html">Cara Berjualan</a></span>
+            <br>
+            <span><a href="pencairan-dana.html">Pencairan Dana</a></span>
+            <br>
+            <span><a href="register-publisher.html">Daftar Official Publisher</a></span>
+          </div>
+          <div class="isi-footer-atas" id="isi-bantuan" style="display: none">
+            <span><a href="faq.html">FAQ</a></span>
+            <br>
+            <span><a href="contact.html">Hubungi Kami</a></span>
+            <br>
+            <span><a href="complaint.html">Komplain Pesanan</a></span>
+          </div>
+        </div>
+        <div class="footer-bawah">
+          <div class="row">
+            <div class="col-md-2">
+              <span class="copyright">&copy; 2019, BukuKu</span>
+            </div>
+            <div class="col-md-7"></div>
+            <div class="col-md-3">
+              <div class="contact-us">
+                <span>Contact Us</span>
+                <a href="https://facebook.com"><img src="assets/image/icon/facebook.png"></a>
+                <a href="https://twitter.com"><img src="assets/image/icon/twitter.png"></a>
+                <a href="https://pinterest.com"><img src="assets/image/icon/pinterest.png"></a>
+                <a href="https://instagram.com"><img src="assets/image/icon/instagram.png"></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <script src="assets/js/script.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/jquery.min.js"></script>
+  </body>
+</html>
