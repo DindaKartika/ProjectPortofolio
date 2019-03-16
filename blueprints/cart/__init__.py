@@ -10,8 +10,8 @@ class Cart(db.Model):
 
     id_cart = db.Column(db.Integer, primary_key = True, autoincrement = True)
     id_pembeli = db.Column(db.Integer)
-    total_barang = db.Column(db.String(255), unique = True)
-    total_pembayaran = db.Column(db.Integer, unique = True)
+    total_barang = db.Column(db.String(255))
+    total_pembayaran = db.Column(db.Integer)
     status = db.Column(db.String(50))
     created_at= db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)

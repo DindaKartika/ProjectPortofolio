@@ -13,7 +13,7 @@ class Toko(db.Model):
 
     id_toko = db.Column(db.Integer, primary_key = True, autoincrement = True)
     nama_toko = db.Column(db.String(255), unique = True)
-    id_member = db.Column(db.Integer)
+    id_member = db.Column(db.Integer, unique = True)
     id_metode_pengiriman = db.Column(db.Integer)
     rating = db.Column(db.Float)
     id_metode_pengiriman = db.Column(db.Integer)

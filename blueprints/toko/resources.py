@@ -195,8 +195,8 @@ class BukuTokoResource(Resource):
         bukus = Buku(None, args['id_toko'], args['judul_buku'], args['harga'], args['kategori'], args['gambar'], args['kode_promo'], args['kondisi'], args['status'], created_at, updated_at)
         db.session.add(bukus)
 
-        members = Member.query.filter(Member.id_member == jwtClaim['id_member']).first()
-        members.status == "penjual"
+        # members = Member.query.filter(Member.id_member == jwtClaim['id_member']).first()
+        # members.status == "penjual"
 
         db.session.commit()
 

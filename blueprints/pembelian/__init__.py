@@ -12,7 +12,7 @@ class Pembelian(db.Model):
     id_pembelian = db.Column(db.Integer, primary_key = True, autoincrement = True)
     id_cart = db.Column(db.Integer)
     id_buku = db.Column(db.Integer)
-    jumlah = db.Column(db.String(255), unique = True)
+    jumlah = db.Column(db.String(255))
     total_harga = db.Column(db.String(255))
     id_toko = db.Column(db.Integer)
     id_metode_pengiriman = db.Column(db.Integer)

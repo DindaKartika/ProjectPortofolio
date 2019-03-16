@@ -11,9 +11,9 @@ class Transaksi(db.Model):
     id_transaksi = db.Column(db.Integer, primary_key = True, autoincrement = True)
     id_cart = db.Column(db.Integer)
     id_metode_pembayaran = db.Column(db.Integer)
-    status = db.Column(db.String(50), unique = True)
-    created_at= db.Column(db.DateTime, unique = True)
-    updated_at = db.Column(db.DateTime, unique = True)
+    status = db.Column(db.String(50))
+    created_at= db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
     # client_id = db.Column(db.Integer, db.ForeignKey('client.client_id'))
 
     response_field = {
