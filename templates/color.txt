@@ -1,9 +1,0 @@
-dark-blue : #1206C2
-light-blue : #0CDCF3
-white : #F7F7F7
-grey : #B5B5B8
-border-color : #707070
-
-calibri -> fira sans
-corbel ->poppins
-acumin -> source sans
