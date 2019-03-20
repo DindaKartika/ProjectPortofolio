@@ -4,7 +4,7 @@ cd /home/ubuntu/ecommerce_project/ProjectPortofolio
 git pull
 
 source ~/.profile
-echo "DOCKERHUB_PASS" | docker login --username $DOCKERHUB_USER --password-stdin
+echo "DOCKERHUB_PASS" | sudo docker login --username $DOCKERHUB_USER --password-stdin
 sudo docker stop bukuku
 sudo docker rm bukuku
 sudo docker rmi dindakartika/bukuku
