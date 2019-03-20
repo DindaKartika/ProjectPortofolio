@@ -28,7 +28,6 @@ class Member(db.Model):
         'nama_belakang' : fields.String,
         'username' : fields.String,
         'email' : fields.String,
-        'password' : fields.String,
         'status' : fields.String,
         'created_at' : fields.DateTime,
         'updated_at' : fields.DateTime
