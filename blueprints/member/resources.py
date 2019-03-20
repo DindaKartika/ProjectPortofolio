@@ -3,6 +3,7 @@ from flask import Blueprint
 from flask_restful import Api, Resource, reqparse, marshal
 from flask_jwt_extended import jwt_required, get_jwt_claims
 import datetime
+from passlib.hash import sha256_crypt
 
 from . import *
 
@@ -81,8 +82,9 @@ class MemberRegisterResource(Resource):
         args['status'] = "pembeli"
         args['created_at'] = datetime.datetime.now()
         args['updated_at'] = datetime.datetime.now()
+        passwrd = sha256_crypt.encrypt(args['password'])
 
-        members = Member(None, args['nama_depan'], args['nama_belakang'], args['username'], args['email'], args['password'], args['status'], args['created_at'], args['updated_at'])
+        members = Member(None, args['nama_depan'], args['nama_belakang'], args['username'], args['email'], passwrd, args['status'], args['created_at'], args['updated_at'])
         db.session.add(members)
         db.session.commit()
 

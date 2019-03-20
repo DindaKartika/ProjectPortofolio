@@ -34,6 +34,8 @@ class AdminResource(Resource):
             db.session.add(members)
             db.session.commit()
 
+            output = marshal(members, Member.response_field)
+
             return marshal(members, Member.response_field), 200, {'Content_type' : 'application/json'}
         else:
             return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
