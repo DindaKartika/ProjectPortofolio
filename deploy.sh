@@ -5,6 +5,7 @@ git pull
 
 source ~/.profile
 echo "DOCKERHUB_PASS" | docker login --username $DOCKERHUB_USER --password-stdin
+sudo killall docker-containerd-shim
 docker stop bukuku
 docker rm bukuku
 docker rmi dindakartika/bukuku
