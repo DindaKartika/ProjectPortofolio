@@ -3,7 +3,7 @@ ssh-add -k ~/.ssh/id_rsa &&
 cd /home/ubuntu/ecommerce_project/ProjectPortofolio
 git pull
 
-source ~/.profile
+source /root/.profile
 sudo echo "DOCKERHUB_PASS" | sudo docker login --username $DOCKERHUB_USER --password-stdin
 sudo docker stop bukuku
 sudo docker rm bukuku
