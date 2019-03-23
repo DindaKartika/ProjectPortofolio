@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required
 import datetime
 
 from . import *
+from blueprints.buku import *
 
 bp_detail_buku = Blueprint('detail_buku', __name__)
 api = Api(bp_detail_buku)
@@ -13,6 +14,38 @@ class DetailBukuResource(Resource):
 
     def __init__(self):
         pass
+
+    def get(self, id_detail_buku = None):
+        if id_detail_buku == None:
+            parser = reqparse.RequestParser()
+            parser.add_argument('p', type = int, location = 'args', default = 1)
+            parser.add_argument('rp', type = int, location = 'args', default = 5)
+            parser.add_argument('penulis', type = str, location = 'args')
+            parser.add_argument('penerbit', type = str, location = 'args')
+            args = parser.parse_args()
+
+            offside = (args['p'] * args['rp']) - args['rp']
+            qry = DetailBuku.query
+
+            if args['penulis'] is not None:
+                qry = qry.filter(DetailBuku.penulis.like("%"+args['penulis']+"%"))
+            if args['penerbit'] is not None:
+                qry = qry.filter(DetailBuku.penerbit.like("%"+args['penerbit']+"%"))
+
+            rows = []
+            for row in qry.limit(args['rp']).offset(offside).all():
+                Detail = marshal(row, DetailBuku.response_field)
+                books = Buku.query.filter(Buku.id_buku == DetailBuku.id_buku).first()
+                Detail['book'] = marshal(books,Buku.response_field)
+                rows.append(Detail)
+
+            return rows, 200, {'Content_type' : 'application/json'}
+        else:
+            qry = DetailBuku.query.get(id_detail_buku)
+            if qry is not None:
+                return marshal(qry, DetailBuku.response_field), 200, {'Content_type' : 'application/json'}
+            else:
+                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
     
     def post(self):
         parser = reqparse.RequestParser()

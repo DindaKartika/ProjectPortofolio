@@ -174,33 +174,37 @@ class BukuTokoResource(Resource):
         jwtClaim = get_jwt_claims()
 
         id_member = jwtClaim['id_member']
-        tokos = Toko.query.filter(Toko.id_member == id_member).one()
-        id_tokos = tokos.id_toko
+        tokos = Toko.query.filter(Toko.id_member == id_member).first()
+        if tokos is not None:
+            id_tokos = tokos.id_toko
 
-        parser = reqparse.RequestParser()
-        parser.add_argument('judul_buku', location = 'json', required = True)
-        parser.add_argument('harga', location = 'json', required = True)
-        parser.add_argument('kategori', location = 'json', required = True)
-        parser.add_argument('gambar', location = 'json', required = True)
-        parser.add_argument('kode_promo', location = 'json', required = True)
-        parser.add_argument('kondisi', location = 'json', required = True)
-        args = parser.parse_args()
+            parser = reqparse.RequestParser()
+            parser.add_argument('judul_buku', location = 'json', required = True)
+            parser.add_argument('harga', location = 'json', required = True)
+            parser.add_argument('kategori', location = 'json', required = True)
+            parser.add_argument('gambar', location = 'json', required = True)
+            parser.add_argument('kode_promo', location = 'json', required = True)
+            parser.add_argument('kondisi', location = 'json', required = True)
+            args = parser.parse_args()
 
-        args['id_toko'] = id_tokos
+            args['id_toko'] = id_tokos
 
-        args['status'] = "dijual"
-        created_at = datetime.datetime.now()
-        updated_at = datetime.datetime.now()
+            args['status'] = "dijual"
+            created_at = datetime.datetime.now()
+            updated_at = datetime.datetime.now()
 
-        bukus = Buku(None, args['id_toko'], args['judul_buku'], args['harga'], args['kategori'], args['gambar'], args['kode_promo'], args['kondisi'], args['status'], created_at, updated_at)
-        db.session.add(bukus)
+            bukus = Buku(None, args['id_toko'], args['judul_buku'], args['harga'], args['kategori'], args['gambar'], args['kode_promo'], args['kondisi'], args['status'], created_at, updated_at)
+            db.session.add(bukus)
 
-        # members = Member.query.filter(Member.id_member == jwtClaim['id_member']).first()
-        # members.status == "penjual"
+            member = Member.query.filter(Member.id_member == id_member).first()
+            member.status = 'penjual'
 
-        db.session.commit()
+            db.session.commit()
 
-        return marshal(bukus, Buku.response_field), 200, {'Content_type' : 'application/json'}
+            return marshal(bukus, Buku.response_field), 200, {'Content_type' : 'application/json'}
+        else:
+            return {'status' : 'NOT_FOUND', 'message' : 'Bukan Penjual'}, 404, {'Content_type' : 'application/json'}
+
 
     @jwt_required
     def delete(self, id_buku):

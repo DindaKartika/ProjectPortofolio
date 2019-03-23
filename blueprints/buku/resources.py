@@ -40,15 +40,22 @@ class BukuResource(Resource):
 
             rows = []
             for row in qry.limit(args['rp']).offset(offside).all():
-                rows.append(marshal(row, Buku.response_field))
+                buku = marshal(row, Buku.response_field)
+                details = DetailBuku.query.filter(DetailBuku.id_buku == Buku.id_buku).first()
+                buku['detail'] = marshal(details, DetailBuku.response_field)
+                rows.append(buku)
 
             return rows, 200, {'Content_type' : 'application/json'}
         else:
             qry = Buku.query.get(id_buku)
+            qry = qry.filter(Buku.status=='dijual')
             if qry is not None:
                 return marshal(qry, Buku.response_field), 200, {'Content_type' : 'application/json'}
             else:
                 return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+
+    def options(self):
+        return {}, 200
 
 
 api.add_resource(BukuResource, '', '/<int:id_buku>')

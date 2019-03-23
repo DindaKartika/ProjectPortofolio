@@ -2,6 +2,8 @@ import random, logging
 from blueprints import db
 from flask_restful import fields
 
+from blueprints.buku import *
+
 class DetailBuku(db.Model):
 
     __tablename__ = "detail_buku"

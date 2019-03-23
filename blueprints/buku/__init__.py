@@ -3,6 +3,7 @@ from blueprints import db
 from flask_restful import fields
 
 from blueprints.toko import *
+from blueprints.detail_buku import *
 
 class Buku(db.Model):
 

@@ -23,7 +23,7 @@ class MemberResource(Resource):
 
         qry = Member.query.get(id_member)
         member = marshal(qry, Member.response_field)
-        details = DetailMember.query.get(qry.id_member)
+        details = DetailMember.query.filter(DetailMember.id_member == qry.id_member).first()
         member['detail'] = marshal(details, DetailMember.response_field)
 
         if qry is not None:
@@ -61,6 +61,9 @@ class MemberResource(Resource):
             return marshal(qry, Member.response_field), 200, {'Content_type' : 'application/json'}
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+
+    def options(self):
+        return {}, 200
 
 
 api.add_resource(MemberResource, '/me')
