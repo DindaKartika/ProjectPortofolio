@@ -93,4 +93,8 @@ class MemberRegisterResource(Resource):
 
         return marshal(members, Member.response_field), 200, {'Content_type' : 'application/json'}
 
+    def options(self):
+        return {}, 200
+
+
 api.add_resource(MemberRegisterResource, '/register')

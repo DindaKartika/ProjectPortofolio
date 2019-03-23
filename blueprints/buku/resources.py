@@ -48,7 +48,6 @@ class BukuResource(Resource):
             return rows, 200, {'Content_type' : 'application/json'}
         else:
             qry = Buku.query.get(id_buku)
-            qry = qry.filter(Buku.status=='dijual')
             if qry is not None:
                 return marshal(qry, Buku.response_field), 200, {'Content_type' : 'application/json'}
             else:
