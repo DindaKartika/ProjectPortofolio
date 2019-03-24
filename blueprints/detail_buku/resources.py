@@ -91,5 +91,8 @@ class DetailBukuResource(Resource):
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
+    def options(self):
+        return {}, 200
+
 
 api.add_resource(DetailBukuResource, '', '/<int:id_detail_buku>')

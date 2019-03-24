@@ -56,7 +56,13 @@ class TransaksiResource(Resource):
         transaksis = Transaksi(None, args['id_cart'], args['id_metode_pembayaran'], args['status'], created_at, updated_at)
         db.session.add(transaksis)
         db.session.commit()
+        transaksi = marshal(transaksis, Transaksi.response_field)
+        carts = Cart.query.filter(Cart.id_cart == transaksis.id_cart).first()
+        transaksi['cart'] = marshal(transaksis, Transaksi.response_field)
 
-        return marshal(transaksis, Transaksi.response_field), 200, {'Content_type' : 'application/json'}
+        return transaksi, 200, {'Content_type' : 'application/json'}
+    
+    def options(self):
+        return {}, 200
 
 api.add_resource(TransaksiResource, '', '/<int:id_transaksi>')

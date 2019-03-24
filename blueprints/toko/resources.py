@@ -5,6 +5,9 @@ from flask_jwt_extended import jwt_required, get_jwt_claims
 import datetime
 
 from . import *
+from blueprints.toko import *
+from blueprints.member import *
+from blueprints.cart import *
 
 bp_toko = Blueprint('toko', __name__)
 api = Api(bp_toko)
@@ -45,6 +48,9 @@ class TokoResource(Resource):
         db.session.commit()
 
         return marshal(tokos, Toko.response_field), 200, {'Content_type' : 'application/json'}
+        
+    def options(self):
+        return {}, 200
 
 api.add_resource(TokoResource, '', '/<int:id_toko>')
 
@@ -123,6 +129,9 @@ class MyTokoResource(Resource):
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
+    def options(self):
+        return {}, 200
+
 api.add_resource(MyTokoResource, '/me')
 
 class BukuTokoResource(Resource):
@@ -132,42 +141,44 @@ class BukuTokoResource(Resource):
 
     @jwt_required
     def get(self, id_buku = None):
-        if id_buku == None:
-            parser = reqparse.RequestParser()
-            parser.add_argument('p', type = int, location = 'args', default = 1)
-            parser.add_argument('rp', type = int, location = 'args', default = 5)
-            parser.add_argument('id_toko', type = str, location = 'args')
-            parser.add_argument('judul_buku', type = str, location = 'args')
-            parser.add_argument('kondisi', type = str, location = 'args')
-            parser.add_argument('kategori', type=str, location = 'args')
-            parser.add_argument('status', type=str, location = 'args')
-            args = parser.parse_args()
+        jwtClaim = get_jwt_claims()
+        if jwtClaim['status'] == 'penjual':
+            if id_buku == None:
+                parser = reqparse.RequestParser()
+                parser.add_argument('p', type = int, location = 'args', default = 1)
+                parser.add_argument('rp', type = int, location = 'args', default = 5)
+                parser.add_argument('judul_buku', type = str, location = 'args')
+                parser.add_argument('kondisi', type = str, location = 'args')
+                parser.add_argument('kategori', type=str, location = 'args')
+                parser.add_argument('status', type=str, location = 'args')
+                args = parser.parse_args()
 
-            offside = (args['p'] * args['rp']) - args['rp']
-            qry = buku.query
+                offside = (args['p'] * args['rp']) - args['rp']
+                qry = Buku.query
 
-            if args['id_toko'] is not None:
-                qry = qry.filter(Buku.id_toko==args['id_toko'])
-            if args['judul_buku'] is not None:
-                qry = qry.filter(Buku.judul_buku.like("%"+args['judul_buku']+"%"))
-            if args['kondisi'] is not None:
-                qry = qry.filter(Buku.kondisi.like("%"+args['kondisi']+"%"))
-            if args['kategori'] is not None:
-                qry = qry.filter(Buku.kategori.like("%"+args['kategori']+"%"))
-            if args['status'] is not None:
-                qry = qry.filter(Buku.status.like("%"+args['status']+"%"))
+                tokos = Toko.query.filter(Toko.id_member == jwtClaim['id_member']).first()
+                qry = qry.filter(Buku.id_toko==tokos.id_toko).all()
 
-            rows = []
-            for row in qry.limit(args['rp']).offset(offside).all():
-                rows.append(marshal(row, Buku.response_field))
+                if args['judul_buku'] is not None:
+                    qry = qry.filter(Buku.judul_buku.like("%"+args['judul_buku']+"%"))
+                if args['kondisi'] is not None:
+                    qry = qry.filter(Buku.kondisi.like("%"+args['kondisi']+"%"))
+                if args['kategori'] is not None:
+                    qry = qry.filter(Buku.kategori.like("%"+args['kategori']+"%"))
+                if args['status'] is not None:
+                    qry = qry.filter(Buku.status.like("%"+args['status']+"%"))
 
-            return rows, 200, {'Content_type' : 'application/json'}
-        else:
-            qry = buku.query.get(id_buku)
-            if qry is not None:
-                return marshal(qry, Buku.response_field), 200, {'Content_type' : 'application/json'}
+                rows = []
+                for row in qry:
+                    rows.append(marshal(row, Buku.response_field))
+
+                return rows, 200, {'Content_type' : 'application/json'}
             else:
-                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+                qry = buku.query.get(id_buku)
+                if qry is not None:
+                    return marshal(qry, Buku.response_field), 200, {'Content_type' : 'application/json'}
+                else:
+                    return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
     
     @jwt_required
     def post(self):
@@ -183,7 +194,7 @@ class BukuTokoResource(Resource):
             parser.add_argument('harga', location = 'json', required = True)
             parser.add_argument('kategori', location = 'json', required = True)
             parser.add_argument('gambar', location = 'json', required = True)
-            parser.add_argument('kode_promo', location = 'json', required = True)
+            parser.add_argument('kode_promo', location = 'json')
             parser.add_argument('kondisi', location = 'json', required = True)
             args = parser.parse_args()
 
@@ -251,6 +262,9 @@ class BukuTokoResource(Resource):
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
+    def options(self):
+        return {}, 200
+
 
 api.add_resource(BukuTokoResource, '/buku', '/buku/<int:id_buku>')
 
@@ -277,7 +291,14 @@ class PembelianTokoResource(Resource):
 
         rows = []
         for row in qry.limit(args['rp']).offset(offside).all():
-            rows.append(marshal(row, Pembelian.response_field))
+            penjualan = marshal(row, Pembelian.response_field)
+            carts = Cart.query.filter(Cart.id_cart == row.id_cart).filter(Cart.status=='unfinished').first()
+            penjualan['cart'] = marshal(carts, Cart.response_field)
+            pembeli = Member.query.filter(Member.id_member == carts.id_pembeli).first()
+            penjualan['pembeli'] = marshal(pembeli, Member.response_field)
+            bukus = Buku.query.filter(Buku.id_buku == row.id_buku).first()
+            penjualan['buku'] = marshal(bukus, Buku.response_field)
+            rows.append(penjualan)
 
         return rows, 200, {'Content_type' : 'application/json'}
 
@@ -298,6 +319,9 @@ class PembelianTokoResource(Resource):
             return marshal(qry, Pembelian.response_field), 200, {'Content_type' : 'application/json'}
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+
+    def options(self):
+        return {}, 200
 
 
 api.add_resource(PembelianTokoResource, '/penjualan', '/penjualan/<int:id_pembelian>')

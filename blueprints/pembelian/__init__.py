@@ -4,6 +4,7 @@ from flask_restful import fields
 
 from blueprints.cart import *
 from blueprints.buku import *
+from blueprints.member import *
 
 class Pembelian(db.Model):
 

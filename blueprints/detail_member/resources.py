@@ -106,5 +106,8 @@ class DetailMemberResource(Resource):
         else:
             return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
+    def options(self):
+        return {}, 200
+
 
 api.add_resource(DetailMemberResource, '/me', '/me/<int:id_detail_member>')

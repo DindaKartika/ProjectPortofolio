@@ -4,6 +4,8 @@ from flask_restful import Api, Resource, reqparse, marshal
 from flask_jwt_extended import jwt_required, get_jwt_claims
 
 from . import *
+from blueprints.toko import *
+from blueprints.metode_pengiriman import *
 
 bp_buku = Blueprint('buku', __name__)
 api = Api(bp_buku)
@@ -43,13 +45,22 @@ class BukuResource(Resource):
                 buku = marshal(row, Buku.response_field)
                 details = DetailBuku.query.filter(DetailBuku.id_buku == Buku.id_buku).first()
                 buku['detail'] = marshal(details, DetailBuku.response_field)
+                tokos = Toko.query.filter(Toko.id_toko == Buku.id_toko).first()
+                buku['shop'] = marshal(tokos, Toko.response_field)
                 rows.append(buku)
 
             return rows, 200, {'Content_type' : 'application/json'}
         else:
             qry = Buku.query.get(id_buku)
+            buku = marshal(qry, Buku.response_field)
+            details = DetailBuku.query.filter(DetailBuku.id_buku == Buku.id_buku).first()
+            buku['detail'] = marshal(details, DetailBuku.response_field)
+            tokos = Toko.query.filter(Toko.id_toko == Buku.id_toko).first()
+            buku['shop'] = marshal(tokos, Toko.response_field)
+            methods = MetodePengiriman.query.filter(MetodePengiriman.id_metode_pengiriman==Toko.id_metode_pengiriman).first()
+            buku['kurir'] = marshal(methods, MetodePengiriman.response_field)
             if qry is not None:
-                return marshal(qry, Buku.response_field), 200, {'Content_type' : 'application/json'}
+                return buku, 200, {'Content_type' : 'application/json'}
             else:
                 return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 

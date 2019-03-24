@@ -53,7 +53,7 @@ class PembelianResource(Resource):
 
         else:
 
-            carts.total_barang = carts.total_barang + args['jumlah']
+            carts.total_barang = int(carts.total_barang) + int(args['jumlah'])
             carts.total_pembayaran = str(carts.total_pembayaran + total_harga)
             db.session.commit()
 
@@ -74,5 +74,8 @@ class PembelianResource(Resource):
             return 'Deleted', 200, {'Content_type' : 'application/json'}
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+    
+    def options(self):
+        return {}, 200
 
 api.add_resource(PembelianResource, '/me', '/me/<int:id_pembelian>')
