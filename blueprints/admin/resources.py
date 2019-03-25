@@ -40,6 +40,9 @@ class AdminResource(Resource):
         else:
             return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
+    def options(self):
+        return {}, 200
+
 api.add_resource(AdminResource, '/new')
 
 class MemberResource(Resource):
@@ -105,6 +108,9 @@ class MemberResource(Resource):
         else:
             return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
+    def options(self, id_member=None):
+        return {}, 200
+
 
 api.add_resource(MemberResource, '/member', '/member/<int:id_member>')
 
@@ -132,7 +138,12 @@ class TokoResource(Resource):
 
                 rows = []
                 for row in qry.limit(args['rp']).offset(offside).all():
-                    rows.append(marshal(row, Toko.response_field))
+                    toko = marshal(row, Toko.response_field)
+                    pemiliks = Member.query.filter(Member.id_member == row.id_member).first()
+                    toko['pemilik'] = marshal(pemiliks, Member.response_field)
+                    pengirimans = MetodePengiriman.query.filter(MetodePengiriman.id_metode_pengiriman == row.id_metode_pengiriman).first()
+                    toko['pengiriman'] = marshal(pengirimans, MetodePengiriman.response_field)
+                    rows.append(toko)
 
                 return rows, 200, {'Content_type' : 'application/json'}
             else:
@@ -171,6 +182,8 @@ class TokoResource(Resource):
         else:
             return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
+    def options(self, id_toko=None):
+        return {}, 200
 
 api.add_resource(TokoResource, '/toko', '/toko/<int:id_toko>')
 
@@ -198,7 +211,10 @@ class BukuResource(Resource):
 
                 rows = []
                 for row in qry.limit(args['rp']).offset(offside).all():
-                    rows.append(marshal(row, Buku.response_field))
+                    buku = marshal(row, Buku.response_field)
+                    tokos = Toko.query.filter(Toko.id_toko == row.id_toko).first()
+                    buku['toko'] = marshal(tokos, Toko.response_field)
+                    rows.append(buku)
 
                 return rows, 200, {'Content_type' : 'application/json'}
             else:
@@ -208,6 +224,8 @@ class BukuResource(Resource):
             buku = marshal(qry, Buku.response_field)
             details = DetailBuku.query.get(qry.id_buku)
             buku['detail'] = marshal(details, DetailBuku.response_field)
+            tokos = Toko.query.filter(Toko.id_toko == qry.id_buku).first()
+            buku['shop'] = marshal(tokos, Toko.response_field)
 
             if qry is not None:
                 return buku, 200, {'Content_type' : 'application/json'}
@@ -237,6 +255,8 @@ class BukuResource(Resource):
         else:
             return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
+    def options(self, id_buku=None):
+        return {}, 200
 
 api.add_resource(BukuResource, '/buku', '/buku/<int:id_buku>')
 
@@ -264,7 +284,10 @@ class CartResource(Resource):
 
                 rows = []
                 for row in qry.limit(args['rp']).offset(offside).all():
-                    rows.append(marshal(row, Cart.response_field))
+                    cart = marshal(row, Cart.response_field)
+                    pembelis = Member.query.filter(Member.id_member == row.id_pembeli).first()
+                    cart['pembeli'] = marshal(pembelis, Member.response_field)
+                    rows.append(cart)
 
                 return rows, 200, {'Content_type' : 'application/json'}
             else:
@@ -272,8 +295,16 @@ class CartResource(Resource):
         else:
             qry = Cart.query.get(id_cart)
             cart = marshal(qry, Cart.response_field)
-            details = Pembelian.query.get(qry.id_cart)
-            cart['detail'] = marshal(details, Pembelian.response_field)
+            pembelis = Member.query.filter(Member.id_member == qry.id_pembeli).first()
+            cart['pembeli'] = marshal(pembelis, Member.response_field)
+            pembelians =  Pembelian.query.filter(Pembelian.id_cart == qry.id_cart).all()
+
+            cart['pembelian'] = []
+            for beli in pembelians:
+                belis = marshal(beli, Pembelian.response_field)
+                bukus = Buku.query.filter(Buku.id_buku == beli.id_buku).first()
+                belis['buku'] = marshal(bukus, Buku.response_field)
+                cart['pembelian'].append(belis)
 
             if qry is not None:
                 return cart, 200, {'Content_type' : 'application/json'}
@@ -303,6 +334,9 @@ class CartResource(Resource):
         else:
             return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
+    def options(self, id_cart=None):
+        return {}, 200
+
 
 api.add_resource(CartResource, '/cart', '/cart/<int:id_cart>')
 
@@ -330,7 +364,10 @@ class TransaksiResource(Resource):
 
                 rows = []
                 for row in qry.limit(args['rp']).offset(offside).all():
-                    rows.append(marshal(row, Transaksi.response_field))
+                    transaksi = marshal(row, Transaksi.response_field)
+                    pembayarans = MetodePembayaran.query.filter(MetodePembayaran.id_metode_pembayaran == row.id_metode_pembayaran).first()
+                    transaksi['pembayaran'] = marshal(pembayarans, MetodePembayaran.response_field)
+                    rows.append(transaksi)
 
                 return rows, 200, {'Content_type' : 'application/json'}
             else:
@@ -367,6 +404,8 @@ class TransaksiResource(Resource):
         else:
             return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
+    def options(self, id_transaksi=None):
+        return {}, 200
 
 api.add_resource(TransaksiResource, '/transaksi', '/transaksi/<int:id_transaksi>')
 
@@ -477,6 +516,9 @@ class MetodePembayaranResource(Resource):
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
         # else:
         #     return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
+
+    def options(self, metode_pembayaran=None):
+        return {}, 200
 
 
 api.add_resource(MetodePembayaranResource, '/metode_pembayaran', '/metode_pembayaran/<int:id_metode_pembayaran>')
@@ -589,5 +631,8 @@ class MetodePengirimanResource(Resource):
         # else:
         #     return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
+
+    def options(self, metode_pengiriman=None):
+        return {}, 200
 
 api.add_resource(MetodePengirimanResource, '/metode_pengiriman', '/metode_pengiriman/<int:id_metode_pengiriman>')

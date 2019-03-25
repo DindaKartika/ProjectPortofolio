@@ -22,12 +22,12 @@ class CartResource(Resource):
         qry = Cart.query.filter(Cart.id_pembeli == id_pembelis).filter(Cart.status == 'unfinished').first()
         cart = marshal(qry, Cart.response_field)
 
-        pembelians =  Pembelian.query.filter(Pembelian.id_cart == Cart.id_cart).all()
+        pembelians =  Pembelian.query.filter(Pembelian.id_cart == qry.id_cart).all()
 
-        # rows = []
-        # for row in pembelians:
-        cart['pembelian'] = marshal(pembelians, Pembelian.response_field)
-            # rows.append(cart)
+        rows = []
+        for row in pembelians:
+            cart['pembelian'] = marshal(pembelians, Pembelian.response_field)
+            rows.append(cart)
 
         if qry is not None:
             return cart, 200, {'Content_type' : 'application/json'}

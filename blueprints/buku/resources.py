@@ -24,6 +24,8 @@ class BukuResource(Resource):
             parser.add_argument('judul_buku', type = str, location = 'args')
             parser.add_argument('kondisi', type = str, location = 'args')
             parser.add_argument('kategori', type=str, location = 'args')
+            parser.add_argument('penerbit', type=str, location = 'args')
+            parser.add_argument('penulis', type=str, location = 'args')
             args = parser.parse_args()
 
             offside = (args['p'] * args['rp']) - args['rp']
@@ -37,6 +39,10 @@ class BukuResource(Resource):
                 qry = qry.filter(Buku.kondisi.like("%"+args['kondisi']+"%"))
             if args['kategori'] is not None:
                 qry = qry.filter(Buku.kategori.like("%"+args['kategori']+"%"))
+            if args['penerbit'] is not None:
+                qry = qry.filter(Buku.penerbit.like("%"+args['penerbit']+"%"))
+            if args['penulis'] is not None:
+                qry = qry.filter(Buku.penulis.like("%"+args['penulis']+"%"))
 
             qry = qry.filter(Buku.status=='dijual')
 
@@ -53,7 +59,7 @@ class BukuResource(Resource):
         else:
             qry = Buku.query.get(id_buku)
             buku = marshal(qry, Buku.response_field)
-            details = DetailBuku.query.filter(DetailBuku.id_buku == Buku.id_buku).first()
+            details = DetailBuku.query.filter(DetailBuku.id_buku == qry.id_buku).first()
             buku['detail'] = marshal(details, DetailBuku.response_field)
             tokos = Toko.query.filter(Toko.id_toko == Buku.id_toko).first()
             buku['shop'] = marshal(tokos, Toko.response_field)

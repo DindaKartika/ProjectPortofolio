@@ -49,7 +49,7 @@ class TokoResource(Resource):
 
         return marshal(tokos, Toko.response_field), 200, {'Content_type' : 'application/json'}
         
-    def options(self):
+    def options(self, id_toko=None):
         return {}, 200
 
 api.add_resource(TokoResource, '', '/<int:id_toko>')
@@ -174,9 +174,14 @@ class BukuTokoResource(Resource):
 
                 return rows, 200, {'Content_type' : 'application/json'}
             else:
-                qry = buku.query.get(id_buku)
+                qry = Buku.query.get(id_buku)
+                buku = marshal(qry, Buku.response_field)
+                details = DetailBuku.query.filter(DetailBuku.id_buku == qry.id_buku).first()
+                buku['detail'] = marshal(details, DetailBuku.response_field)
+                shops = Toko.query.filter(Toko.id_toko == qry.id_toko).first()
+                buku['shop'] = marshal(shops, Toko.response_field)
                 if qry is not None:
-                    return marshal(qry, Buku.response_field), 200, {'Content_type' : 'application/json'}
+                    return buku, 200, {'Content_type' : 'application/json'}
                 else:
                     return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
     
@@ -262,7 +267,7 @@ class BukuTokoResource(Resource):
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
-    def options(self):
+    def options(self, id_buku=None):
         return {}, 200
 
 
@@ -298,6 +303,8 @@ class PembelianTokoResource(Resource):
             penjualan['pembeli'] = marshal(pembeli, Member.response_field)
             bukus = Buku.query.filter(Buku.id_buku == row.id_buku).first()
             penjualan['buku'] = marshal(bukus, Buku.response_field)
+            shops = Toko.query.filter(Toko.id_toko == row.id_toko).first()
+            penjualan['shop'] = marshal(shops, Toko.response_field)
             rows.append(penjualan)
 
         return rows, 200, {'Content_type' : 'application/json'}
@@ -320,7 +327,7 @@ class PembelianTokoResource(Resource):
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
-    def options(self):
+    def options(self, id_pembelian=None):
         return {}, 200
 
 

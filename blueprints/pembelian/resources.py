@@ -78,4 +78,7 @@ class PembelianResource(Resource):
     def options(self):
         return {}, 200
 
+    def options(self, id_pembelian):
+        return {}, 200
+
 api.add_resource(PembelianResource, '/me', '/me/<int:id_pembelian>')
