@@ -49,9 +49,9 @@ class BukuResource(Resource):
             rows = []
             for row in qry.limit(args['rp']).offset(offside).all():
                 buku = marshal(row, Buku.response_field)
-                details = DetailBuku.query.filter(DetailBuku.id_buku == Buku.id_buku).first()
+                details = DetailBuku.query.filter(DetailBuku.id_buku == row.id_buku).first()
                 buku['detail'] = marshal(details, DetailBuku.response_field)
-                tokos = Toko.query.filter(Toko.id_toko == Buku.id_toko).first()
+                tokos = Toko.query.filter(Toko.id_toko == row.id_toko).first()
                 buku['shop'] = marshal(tokos, Toko.response_field)
                 rows.append(buku)
 
@@ -61,7 +61,7 @@ class BukuResource(Resource):
             buku = marshal(qry, Buku.response_field)
             details = DetailBuku.query.filter(DetailBuku.id_buku == qry.id_buku).first()
             buku['detail'] = marshal(details, DetailBuku.response_field)
-            tokos = Toko.query.filter(Toko.id_toko == Buku.id_toko).first()
+            tokos = Toko.query.filter(Toko.id_toko == qry.id_toko).first()
             buku['shop'] = marshal(tokos, Toko.response_field)
             methods = MetodePengiriman.query.filter(MetodePengiriman.id_metode_pengiriman==Toko.id_metode_pengiriman).first()
             buku['kurir'] = marshal(methods, MetodePengiriman.response_field)

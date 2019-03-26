@@ -6,6 +6,7 @@ import datetime
 from datetime import timedelta
 
 from . import *
+from blueprints.toko import *
 
 bp_detail_toko = Blueprint('detail_toko', __name__)
 api = Api(bp_detail_toko)
@@ -44,9 +45,9 @@ class DetailTokoResource(Resource):
         jwtClaim = get_jwt_claims()
 
         id_member = jwtClaim['id_member']
-        tokos = Toko.query.get(id_member)
+        tokos = Toko.query.filter(Toko.id_member == id_member).first()
 
-        qry = DetailToko.query.get(tokos.id_toko)
+        qry = DetailToko.query.filter(DetailToko.id_toko == tokos.id_toko).first()
 
         parser = reqparse.RequestParser()
         parser.add_argument('alamat_lengkap', location = 'json')
@@ -72,5 +73,7 @@ class DetailTokoResource(Resource):
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
+    def options(self):
+        return {}, 200
 
 api.add_resource(DetailTokoResource, '')

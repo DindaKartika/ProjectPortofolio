@@ -6,6 +6,7 @@ import datetime
 
 from . import *
 from blueprints.buku import *
+from blueprints.toko import *
 
 bp_detail_buku = Blueprint('detail_buku', __name__)
 api = Api(bp_detail_buku)
@@ -35,8 +36,10 @@ class DetailBukuResource(Resource):
             rows = []
             for row in qry.limit(args['rp']).offset(offside).all():
                 Detail = marshal(row, DetailBuku.response_field)
-                books = Buku.query.filter(Buku.id_buku == DetailBuku.id_buku).first()
+                books = Buku.query.filter(Buku.id_buku == row.id_buku).first()
                 Detail['book'] = marshal(books,Buku.response_field)
+                shops = Toko.query.filter(Toko.id_toko == books.id_toko).first()
+                Detail['shop'] = marshal(shops, Toko.response_field)
                 rows.append(Detail)
 
             return rows, 200, {'Content_type' : 'application/json'}

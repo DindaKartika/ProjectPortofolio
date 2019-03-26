@@ -22,4 +22,7 @@ class MetodePembayaranResource(Resource):
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
+    def options(self, id_metode_pembayaran=None):
+        return {}, 200
+
 api.add_resource(MetodePembayaranResource, '/<int:id_metode_pembayaran>')

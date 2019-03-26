@@ -20,13 +20,9 @@ class DetailMemberResource(Resource):
         if id_detail_member == None:
             qry = DetailMember.query
             
-            qry = qry.filter(DetailMember.id_member==jwtClaims['id_member'])
+            qry = qry.filter(DetailMember.id_member==jwtClaims['id_member']).first()
 
-            rows = []
-            for row in qry:
-                rows.append(marshal(row, DetailMember.response_field))
-
-            return rows, 200, {'Content_type' : 'application/json'}
+            return marshal(qry, DetailMember.response_field), 200, {'Content_type' : 'application/json'}
         else:
             qry = DetailMember.query.get(id_detail_member)
             if qry is not None:
@@ -78,35 +74,38 @@ class DetailMemberResource(Resource):
     @jwt_required
     def put(self, id_detail_member):
         jwtClaims = get_jwt_claims()
-        qry = DetailMember.query.get(id_detail_member)
-        if jwtClaims['id_member'] == qry.id_member:
-            parser = reqparse.RequestParser()
-            parser.add_argument('alamat_lengkap', location = 'json')
-            parser.add_argument('kota', location = 'json')
-            parser.add_argument('kecamatan', location = 'json')
-            parser.add_argument('kode_pos', type = int, location = 'json')
-            args = parser.parse_args()
-            
-            if args['alamat_lengkap'] is not None:
-                qry.alamat_lengkap = args['alamat_lengkap']
-            if args['kota'] is not None:
-                qry.kota = args['kota']
-            if args['kecamatan'] is not None:
-                qry.kecamatan = args['kecamatan']
-            if args['kode_pos'] is not None:
-                qry.kode_pos = args['kode_pos']
+        qry = DetailMember.query.filter(DetailMember.id_member == id_detail_member).first()
+        parser = reqparse.RequestParser()
+        parser.add_argument('alamat_lengkap', location = 'json')
+        parser.add_argument('kota', location = 'json')
+        parser.add_argument('kecamatan', location = 'json')
+        parser.add_argument('kode_pos', type = int, location = 'json')
+        parser.add_argument('nama', location = 'json')
+        parser.add_argument('telepon', location = 'json')
+        args = parser.parse_args()
+        
+        if args['alamat_lengkap'] is not None:
+            qry.alamat_lengkap = args['alamat_lengkap']
+        if args['kota'] is not None:
+            qry.kota = args['kota']
+        if args['kecamatan'] is not None:
+            qry.kecamatan = args['kecamatan']
+        if args['kode_pos'] is not None:
+            qry.kode_pos = args['kode_pos']
+        if args['nama'] is not None:
+            qry.nama = args['nama']
+        if args['telepon'] is not None:
+            qry.telepon = args['telepon']
 
-            qry.updated_at = datetime.datetime.now()
+        qry.updated_at = datetime.datetime.now()
 
-            db.session.commit()
-            if qry is not None:
-                return marshal(qry, DetailMember.response_field), 200, {'Content_type' : 'application/json'}
-            else:
-                return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
+        db.session.commit()
+        if qry is not None:
+            return marshal(qry, DetailMember.response_field), 200, {'Content_type' : 'application/json'}
         else:
-            return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
+            return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
 
-    def options(self):
+    def options(self, id_detail_member = None):
         return {}, 200
 
 

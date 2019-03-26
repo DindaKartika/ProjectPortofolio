@@ -77,7 +77,7 @@ class MemberResource(Resource):
         else:
             qry = Member.query.get(id_member)
             member = marshal(qry, Member.response_field)
-            details = DetailMember.query.get(qry.id_member)
+            details = DetailMember.query.filter(DetailMember.id_member == qry.id_member).first()
             member['detail'] = marshal(details, DetailMember.response_field)
 
             if qry is not None:
@@ -153,6 +153,10 @@ class TokoResource(Resource):
             toko = marshal(qry, Toko.response_field)
             details = DetailToko.query.get(qry.id_toko)
             toko['detail'] = marshal(details, DetailToko.response_field)
+            pemiliks = Member.query.filter(Member.id_member == qry.id_member).first()
+            toko['pemilik'] = marshal(pemiliks, Member.response_field)
+            pengirimans = MetodePengiriman.query.filter(MetodePengiriman.id_metode_pengiriman == qry.id_metode_pengiriman).first()
+            toko['pengiriman'] = marshal(pengirimans, MetodePengiriman.response_field)
 
             if qry is not None:
                 return toko, 200, {'Content_type' : 'application/json'}
@@ -304,6 +308,10 @@ class CartResource(Resource):
                 belis = marshal(beli, Pembelian.response_field)
                 bukus = Buku.query.filter(Buku.id_buku == beli.id_buku).first()
                 belis['buku'] = marshal(bukus, Buku.response_field)
+                tokos = Toko.query.filter(Toko.id_toko == beli.id_toko).first()
+                belis['toko'] = marshal(tokos, Toko.response_field)
+                pengirimans = Toko.query.filter(MetodePengiriman.id_metode_pengiriman == beli.id_metode_pengiriman).first()
+                belis['metode_pengiriman'] = marshal(pengirimans, MetodePengiriman.response_field)
                 cart['pembelian'].append(belis)
 
             if qry is not None:
@@ -375,6 +383,8 @@ class TransaksiResource(Resource):
         else:
             qry = Transaksi.query.get(id_transaksi)
             transaksi = marshal(qry, Transaksi.response_field)
+            pembayarans = MetodePembayaran.query.filter(MetodePembayaran.id_metode_pembayaran == qry.id_metode_pembayaran).first()
+            transaksi['pembayaran'] = marshal(pembayarans, MetodePembayaran.response_field)
 
             if qry is not None:
                 return transaksi, 200, {'Content_type' : 'application/json'}
@@ -517,7 +527,7 @@ class MetodePembayaranResource(Resource):
         # else:
         #     return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
-    def options(self, metode_pembayaran=None):
+    def options(self, id_metode_pembayaran=None):
         return {}, 200
 
 
@@ -632,7 +642,7 @@ class MetodePengirimanResource(Resource):
         #     return {'status' : 'ACCESS_DENIED', 'message' : 'ID false'}, 401, {'Content_type' : 'application/json'}
 
 
-    def options(self, metode_pengiriman=None):
+    def options(self, id_metode_pengiriman=None):
         return {}, 200
 
 api.add_resource(MetodePengirimanResource, '/metode_pengiriman', '/metode_pengiriman/<int:id_metode_pengiriman>')

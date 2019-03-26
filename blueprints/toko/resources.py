@@ -8,6 +8,7 @@ from . import *
 from blueprints.toko import *
 from blueprints.member import *
 from blueprints.cart import *
+from blueprints.metode_pengiriman import *
 
 bp_toko = Blueprint('toko', __name__)
 api = Api(bp_toko)
@@ -68,7 +69,7 @@ class MyTokoResource(Resource):
         qry = Toko.query.filter(Toko.id_member == id_members).one()
 
         tokos = marshal(qry, Toko.response_field)
-        details = DetailToko.query.get(qry.id_toko)
+        details = DetailToko.query.filter(DetailToko.id_toko == qry.id_toko).first()
         tokos['detail'] = marshal(details, DetailToko.response_field)
 
         if tokos is not None:
@@ -103,7 +104,7 @@ class MyTokoResource(Resource):
 
         id_member = jwtClaim['id_member']
 
-        qry = Toko.query.get(id_member)
+        qry = Toko.query.filter(Toko.id_member==id_member).first()
 
         parser = reqparse.RequestParser()
         parser.add_argument('nama_toko', location = 'json')
@@ -280,34 +281,69 @@ class PembelianTokoResource(Resource):
 
     @jwt_required
     def get(self, id_pembelian = None):
-        parser = reqparse.RequestParser()
-        parser.add_argument('p', type = int, location = 'args', default = 1)
-        parser.add_argument('rp', type = int, location = 'args', default = 10)
-        args = parser.parse_args()
+        if id_pembelian == None:
+            parser = reqparse.RequestParser()
+            parser.add_argument('p', type = int, location = 'args', default = 1)
+            parser.add_argument('rp', type = int, location = 'args', default = 10)
+            args = parser.parse_args()
 
-        jwtClaim = get_jwt_claims()
+            jwtClaim = get_jwt_claims()
 
-        tokos = Toko.query.filter(Toko.id_member == jwtClaim['id_member']).first()
+            tokos = Toko.query.filter(Toko.id_member == jwtClaim['id_member']).first()
 
-        offside = (args['p'] * args['rp']) - args['rp']
-        qry = Pembelian.query
+            offside = (args['p'] * args['rp']) - args['rp']
+            qry = Pembelian.query
 
-        qry = qry.filter(Pembelian.id_toko==tokos.id_toko)
+            qry = qry.filter(Pembelian.id_toko==tokos.id_toko)
 
-        rows = []
-        for row in qry.limit(args['rp']).offset(offside).all():
-            penjualan = marshal(row, Pembelian.response_field)
-            carts = Cart.query.filter(Cart.id_cart == row.id_cart).filter(Cart.status=='unfinished').first()
+            rows = []
+            for row in qry.limit(args['rp']).offset(offside).all():
+                penjualan = marshal(row, Pembelian.response_field)
+                carts = Cart.query.filter(Cart.id_cart == row.id_cart).filter(Cart.status=='unfinished').first()
+                penjualan['cart'] = marshal(carts, Cart.response_field)
+                pembeli = Member.query.filter(Member.id_member == carts.id_pembeli).first()
+                penjualan['pembeli'] = marshal(pembeli, Member.response_field)
+                detail_pembeli = DetailMember.query.filter(DetailMember.id_member == pembeli.id_member).first()
+                penjualan['detail_pembeli'] = marshal(detail_pembeli, DetailMember.response_field)
+                bukus = Buku.query.filter(Buku.id_buku == row.id_buku).first()
+                penjualan['buku'] = marshal(bukus, Buku.response_field)
+                shops = Toko.query.filter(Toko.id_toko == row.id_toko).first()
+                penjualan['shop'] = marshal(shops, Toko.response_field)
+                sends = MetodePengiriman.query.filter(MetodePengiriman.id_metode_pengiriman == row.id_metode_pengiriman).first()
+                penjualan['pengiriman'] = marshal(sends, MetodePengiriman.response_field)
+                rows.append(penjualan)
+
+            return rows, 200, {'Content_type' : 'application/json'}
+        else:
+            # parser = reqparse.RequestParser()
+            # parser.add_argument('p', type = int, location = 'args', default = 1)
+            # parser.add_argument('rp', type = int, location = 'args', default = 10)
+            # args = parser.parse_args()
+
+            # jwtClaim = get_jwt_claims()
+
+            # tokos = Toko.query.filter(Toko.id_member == jwtClaim['id_member']).first()
+
+            # offside = (args['p'] * args['rp']) - args['rp']
+            qry = Pembelian.query
+
+            qry = qry.filter(Pembelian.id_pembelian==id_pembelian).first()
+
+            penjualan = marshal(qry, Pembelian.response_field)
+            carts = Cart.query.filter(Cart.id_cart == qry.id_cart).first()
             penjualan['cart'] = marshal(carts, Cart.response_field)
             pembeli = Member.query.filter(Member.id_member == carts.id_pembeli).first()
             penjualan['pembeli'] = marshal(pembeli, Member.response_field)
-            bukus = Buku.query.filter(Buku.id_buku == row.id_buku).first()
+            detail_pembeli = DetailMember.query.filter(DetailMember.id_member == pembeli.id_member).first()
+            penjualan['detail_pembeli'] = marshal(detail_pembeli, DetailMember.response_field)
+            bukus = Buku.query.filter(Buku.id_buku == qry.id_buku).first()
             penjualan['buku'] = marshal(bukus, Buku.response_field)
-            shops = Toko.query.filter(Toko.id_toko == row.id_toko).first()
+            shops = Toko.query.filter(Toko.id_toko == qry.id_toko).first()
             penjualan['shop'] = marshal(shops, Toko.response_field)
-            rows.append(penjualan)
+            sends = MetodePengiriman.query.filter(MetodePengiriman.id_metode_pengiriman == qry.id_metode_pengiriman).first()
+            penjualan['pengiriman'] = marshal(sends, MetodePengiriman.response_field)
 
-        return rows, 200, {'Content_type' : 'application/json'}
+            return penjualan, 200, {'Content_type' : 'application/json'}
 
     @jwt_required
     def put(self, id_pembelian):
