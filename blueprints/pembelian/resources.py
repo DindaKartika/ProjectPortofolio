@@ -75,10 +75,7 @@ class PembelianResource(Resource):
         else:
             return {'status' : 'NOT_FOUND', 'message' : 'ID not found'}, 404, {'Content_type' : 'application/json'}
     
-    def options(self):
-        return {}, 200
-
-    def options(self, id_pembelian):
+    def options(self, id_pembelian = None):
         return {}, 200
 
 api.add_resource(PembelianResource, '/me', '/me/<int:id_pembelian>')

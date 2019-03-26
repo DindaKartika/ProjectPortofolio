@@ -52,7 +52,7 @@ class MemberResource(Resource):
         if args['email'] is not None:
             qry.email = args['email']
         if args['password'] is not None:
-            qry.password = args['password']
+            qry.password = sha256_crypt.encrypt(args['password'])
             
         qry.updated_at = datetime.datetime.now()
 
